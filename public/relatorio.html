@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório de Feedback - SDR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+  </header>
+  <nav class="site-nav"></nav>
+  <main class="container">
+  <h1>Relatório de Feedback - SDR</h1>
+  <section id="relatorioSDR">
+    <div class="flex-container">
+      <div class="box" id="dados"></div>
+      <div class="resumo" id="resumo-calculo"></div>
+    </div>
+    <h2 id="titulo" style="margin-bottom: 1rem; color: #3498db; font-size: 1.3rem;"></h2>
+    <div id="conteudo" style="margin-bottom: 2rem;"></div>
+    <div style="text-align:center; margin-bottom: 2rem;">
+      <canvas id="grafico" width="400" height="160"></canvas>
+    </div>
+  </section>
+  <button id="voltarBtn" class="btn" onclick="window.location.href='index.html'" style="margin-top: 1rem;">
+    Voltar ao Início
+  </button>
+</main>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/relatorio.js"></script>
+</body>
+</html>
