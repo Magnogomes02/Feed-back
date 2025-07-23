@@ -7,26 +7,8 @@
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <!-- Header com botão do menu, logo e sessão do usuário -->
-  <header class="site-header">
-    <button class="menu-toggle" aria-label="Abrir menu">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
-    </button>
-    <div class="logo">
-      <img src="assets/images/Imagotipo CubboTech Colorida.png" alt="CubboTech">
-    </div>
-    <div class="user-session">
-      <span id="usuario-logado"></span>
-      <button id="logoutBtn" style="display:none">Sair</button>
-    </div>
-  </header>
-
-  <!-- Container do menu lateral (JS injeta o conteúdo aqui) -->
-  <nav class="site-nav"></nav>
-
-  <!-- Conteúdo principal -->
+  <nav class="menu"></nav>
+  
   <main class="container">
     <h1>Formulário de Feedback - SDR</h1>
     <form id="feedbackForm">
@@ -41,24 +23,26 @@
         </select>
       </label>
 
-      <label>Período apurado:</label>
-      <input type="text" name="periodo" required>
+      <label>Período apurado:
+        <input type="text" name="periodo" required>
+      </label>
+      <label>Campanha:
+        <input type="text" name="campanha" value="Ligação Manual" required>
+      </label>
+      <label>Protocolo:
+        <input type="text" name="protocolo" required>
+      </label>
+      <label>Número:
+        <input type="text" name="numero" required>
+      </label>
+      <label>Data da ligação:
+        <input type="datetime-local" name="datalig" required>
+      </label>
+      <label>Qualificação:
+        <input type="text" name="qualif" required>
+      </label>
 
-      <label>Campanha:</label>
-      <input type="text" name="campanha" value="Ligação Manual" required>
-
-      <label>Protocolo:</label>
-      <input type="text" name="protocolo" required>
-
-      <label>Número:</label>
-      <input type="text" name="numero" required>
-
-      <label>Data da ligação:</label>
-      <input type="datetime-local" name="datalig" required>
-
-      <label>Qualificação:</label>
-      <input type="text" name="qualif" required>
-
+      <!-- Tabela dinâmica dos critérios -->
       <table>
         <thead>
           <tr>
@@ -69,30 +53,3 @@
         </thead>
         <tbody id="criterios"></tbody>
       </table>
-
-      <label>Recomendações Finais:</label>
-      <textarea name="nota" rows="5"></textarea>
-
-      <button type="submit" class="btn">Gerar Relatório</button>
-    </form>
-  </main>
-
-  <!-- Scripts essenciais, ordem recomendada -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/menu.js"></script>
-  <script>
-    // Checagem de permissão para gestor
-    (function() {
-      const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
-      if (usuario.papel !== 'gestor') {
-        window.location.href = 'acesso-negado.html';
-      }
-    })();
-  </script>
-  <script src="js/formulario.js"></script>
-</body>
-</html>

@@ -1,136 +1,79 @@
 // index.js
-// Mantém toda a estrutura do seu projeto, só ajusta a tabela "Relatórios Encontrados"
+document.addEventListener("DOMContentLoaded", async () => {
+  const db = firebase.firestore();
+  const listaRelatorios = document.getElementById("lista-relatorios");
+  const nenhumRelatorio = document.getElementById("nenhum-relatorio");
+  const filtroBusca = document.getElementById("filtroBusca");
+  const btnBuscar = document.getElementById("btnBuscar");
 
-let dados = [];
-let filtroSDR = 'todos';
-let filtroPeriodo = 'todos';
-let termoBusca = '';
+  // Busca relatórios do Firestore
+  async function carregarRelatorios(filtro = "") {
+    listaRelatorios.innerHTML = "";
+    let query = db.collection("avaliacoes").orderBy("createdAt", "desc");
+    let snapshot;
+    try {
+      snapshot = await query.get();
+    } catch (err) {
+      listaRelatorios.innerHTML = "<tr><td colspan='7'>Erro ao buscar relatórios: " + err.message + "</td></tr>";
+      return;
+    }
 
-const tabelaBody = document.querySelector('#tabela tbody');
-const nenhum = document.getElementById('nenhum');
-const selectSDR = document.getElementById('filtro-sdr');
-const selectPeriodo = document.getElementById('filtro-periodo');
-const inputBusca = document.getElementById('campo-busca');
-
-// Função principal: busca e renderiza dados do Firestore
-async function carregarRelatorios() {
-  try {
-    const snapshot = await firebase.firestore()
-      .collection("avaliacoes")
-      .orderBy("createdAt", "desc")
-      .get();
-
-    dados = [];
+    let relatorios = [];
     snapshot.forEach(doc => {
-      let d = doc.data();
-      d.id = doc.id; // Para o botão "Ver"
-      dados.push(d);
+      const data = doc.data();
+      // Aplicar filtro simples por SDR, protocolo, período, qualificação ou número
+      const busca = filtro.toLowerCase();
+      if (
+        !filtro ||
+        (data.sdr && data.sdr.toLowerCase().includes(busca)) ||
+        (data.protocolo && data.protocolo.toLowerCase().includes(busca)) ||
+        (data.periodo && data.periodo.toLowerCase().includes(busca)) ||
+        (data.qualif && data.qualif.toLowerCase().includes(busca)) ||
+        (data.numero && data.numero.toLowerCase().includes(busca))
+      ) {
+        relatorios.push({ ...data, id: doc.id });
+      }
     });
 
-    atualizarFiltros();
-    aplicarFiltrosEExibir();
-  } catch (error) {
-    console.error("Erro ao buscar relatórios:", error);
-    tabelaBody.innerHTML = '<tr><td colspan="7">Erro ao buscar relatórios.</td></tr>';
-  }
-}
+    if (relatorios.length === 0) {
+      nenhumRelatorio.style.display = "block";
+      return;
+    } else {
+      nenhumRelatorio.style.display = "none";
+    }
 
-// Atualiza os filtros de SDR e Período baseados nos dados carregados
-function atualizarFiltros() {
-  // SDRs
-  const sdrs = Array.from(new Set(dados.map(d => d.sdr).filter(Boolean)));
-  selectSDR.innerHTML = '<option value="todos">Todos os SDRs</option>' +
-    sdrs.map(sdr => `<option value="${sdr}">${sdr}</option>`).join('');
+    relatorios.forEach(r => {
+      const tr = document.createElement("tr");
 
-  // Períodos
-  const periodos = Array.from(new Set(dados.map(d => d.periodo).filter(Boolean)));
-  selectPeriodo.innerHTML = '<option value="todos">Todos os Períodos</option>' +
-    periodos.map(p => `<option value="${p}">${p}</option>`).join('');
-}
+      // Formatações de datas
+      const dataLig = r.datalig ? new Date(r.datalig).toLocaleString("pt-BR") : "-";
+      const dataCriacao = r.createdAt ? new Date(r.createdAt).toLocaleString("pt-BR") : "-";
+      const nota = r.notaFinal !== undefined ? Number(r.notaFinal).toFixed(2) : "-";
 
-// Aplica filtros e busca, e chama renderLista
-function aplicarFiltrosEExibir() {
-  let filtrados = dados;
-
-  // Filtro por SDR
-  if (filtroSDR !== 'todos') {
-    filtrados = filtrados.filter(d => d.sdr === filtroSDR);
-  }
-  // Filtro por Período
-  if (filtroPeriodo !== 'todos') {
-    filtrados = filtrados.filter(d => d.periodo === filtroPeriodo);
-  }
-  // Filtro por busca (case-insensitive)
-  if (termoBusca.length > 0) {
-    const busca = termoBusca.toLowerCase();
-    filtrados = filtrados.filter(d =>
-      (d.sdr || '').toLowerCase().includes(busca) ||
-      (d.periodo || '').toLowerCase().includes(busca) ||
-      (d.protocolo || '').toLowerCase().includes(busca)
-    );
+      tr.innerHTML = `
+        <td>${r.sdr || "-"}</td>
+        <td>${r.periodo || "-"}</td>
+        <td>${dataLig}</td>
+        <td>${r.protocolo || "-"}</td>
+        <td>${dataCriacao}</td>
+        <td class="nota-tabela">${nota}</td>
+        <td>
+          <a href="relatorio.html?id=${r.id}" class="btn btn-ver" title="Ver Relatório">Ver</a>
+        </td>
+      `;
+      listaRelatorios.appendChild(tr);
+    });
   }
 
-  renderLista(filtrados);
-}
-
-// Renderiza a lista dos relatórios encontrados (ajustado conforme seu padrão)
-function renderLista(docs) {
-  tabelaBody.innerHTML = '';
-  if (docs.length === 0) {
-    nenhum.style.display = 'block';
-    return;
-  }
-  nenhum.style.display = 'none';
-
-  docs.forEach(d => {
-    // Formata datas
-    const dataLig = d.datalig
-      ? new Date(d.datalig).toLocaleString('pt-BR')
-      : '';
-    const createdAt = d.createdAt
-      ? (d.createdAt.toDate ? d.createdAt.toDate().toLocaleString('pt-BR') : new Date(d.createdAt).toLocaleString('pt-BR'))
-      : '';
-    const notaFinal = (typeof d.notaFinal !== "undefined" && d.notaFinal !== null)
-      ? Number(d.notaFinal).toFixed(2).replace('.', ',')
-      : "-";
-
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${d.sdr || ""}</td>
-      <td>${d.periodo || ""}</td>
-      <td>${dataLig}</td>
-      <td>${d.protocolo || ""}</td>
-      <td>${createdAt}</td>
-      <td>${notaFinal}</td>
-      <td>
-        <button class="btn-ver" onclick="verRelatorio('${d.id}')">
-          Ver
-        </button>
-      </td>
-    `;
-    tabelaBody.append(tr);
+  // Filtro por busca
+  btnBuscar.addEventListener("click", () => {
+    carregarRelatorios(filtroBusca.value);
   });
-}
 
-// Botão "Ver" relatório
-function verRelatorio(id) {
-  window.location.href = `relatorio.html?id=${id}`;
-}
+  filtroBusca.addEventListener("keyup", e => {
+    if (e.key === "Enter") carregarRelatorios(filtroBusca.value);
+  });
 
-// Listeners dos filtros e busca
-selectSDR.addEventListener('change', e => {
-  filtroSDR = e.target.value;
-  aplicarFiltrosEExibir();
+  // Carrega todos ao abrir
+  carregarRelatorios();
 });
-selectPeriodo.addEventListener('change', e => {
-  filtroPeriodo = e.target.value;
-  aplicarFiltrosEExibir();
-});
-inputBusca.addEventListener('input', e => {
-  termoBusca = e.target.value;
-  aplicarFiltrosEExibir();
-});
-
-// Carrega os relatórios ao iniciar a página
-window.addEventListener("DOMContentLoaded", carregarRelatorios);

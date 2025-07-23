@@ -1,35 +1,37 @@
-// menu.js
+// js/menu.js
 
-document.addEventListener('DOMContentLoaded', () => {
-  // HTML do menu que aparece no drawer/lateral
-  const menuHTML = `
-    <ul>
-      <li><a href="index.html">🏠 Início</a></li>
-    </ul>
-  `;
-
-  // Injeta no .site-nav (se existir)
-  const nav = document.querySelector('.site-nav');
-  if (nav) nav.innerHTML = menuHTML;
-
-  const toggle = document.querySelector('.menu-toggle');
-  const overlay = document.createElement('div');
-  overlay.className = 'overlay';
-  document.body.appendChild(overlay);
-
-  function openMenu() {
-    if (nav) nav.classList.add('open');
-    overlay.classList.add('show');
-    if (toggle) toggle.setAttribute('aria-expanded', 'true');
+document.addEventListener("DOMContentLoaded", () => {
+  const nav = document.querySelector(".menu");
+  if (nav) {
+    nav.innerHTML = `
+      <header class="site-header">
+        <div class="logo">
+          <img src="assets/images/Imagotipo CubboTech Colorida.png" alt="CubboTech" height="40">
+        </div>
+        <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        <div class="user-session">
+          <span id="usuario-logado"></span>
+          <button id="logoutBtn" style="display:none">Sair</button>
+        </div>
+      </header>
+      <nav class="site-nav">
+        <ul>
+          <li><a href="index.html">🏠 Início</a></li>
+          <li><a href="formulario.html">📝 Formulário</a></li>
+          <li><a href="relatorio.html">📋 Relatório</a></li>
+        </ul>
+      </nav>
+    `;
   }
-  function closeMenu() {
-    if (nav) nav.classList.remove('open');
-    overlay.classList.remove('show');
-    if (toggle) toggle.setAttribute('aria-expanded', 'false');
-  }
 
-  if (toggle) {
-    toggle.addEventListener('click', openMenu);
-    overlay.addEventListener('click', closeMenu);
-  }
+  // Opcional: lógica para mostrar/hide menu no mobile (exemplo simples)
+  document.body.addEventListener("click", function(e) {
+    if (e.target.closest(".menu-toggle")) {
+      document.querySelector(".site-nav").classList.toggle("open");
+    }
+  });
 });

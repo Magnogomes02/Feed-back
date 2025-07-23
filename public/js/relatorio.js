@@ -1,181 +1,143 @@
-window.addEventListener('DOMContentLoaded', async () => {
+// js/relatorio.js
+
+document.addEventListener("DOMContentLoaded", async () => {
   const db = firebase.firestore();
 
-  // Pega o id da URL (?id=XYZ)
-  const params = new URLSearchParams(window.location.search);
-  const docId = params.get('id');
-  if (!docId) {
-    window.location.href = 'index.html';
+  // Utilitário: formata data
+  function formatarData(dt) {
+    if (!dt) return "-";
+    const d = new Date(dt);
+    return isNaN(d) ? "-" : d.toLocaleString("pt-BR");
+  }
+
+  // Critérios na ordem correta
+  const criteriosNomes = [
+    "Identificação de perfil (PIT)",
+    "Abertura e Rapport",
+    "Apresentação de valor",
+    "Convocação do analista fiscal",
+    "Gestão de objeções",
+    "Próximo passo definido",
+    "Tom e linguagem",
+    "Abordagem de Vendas",
+    "Técnica no agendamento",
+    "Efetividade",
+    "Cordialidade e Relacionamento",
+    "Prova social",
+    "Qualificação de Leads",
+    "Tempo de Resposta"
+  ];
+
+  // Captura id pela URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get("id");
+
+  if (!id) {
+    document.body.innerHTML = "<main class='container'><h2>Relatório não encontrado!</h2></main>";
     return;
   }
 
-  // Busca o relatório individual
-  let doc;
+  let relatorio;
+
+  // Busca o relatório pelo id
   try {
-    doc = await db.collection('avaliacoes').doc(docId).get();
-  } catch (e) {
-    document.getElementById('dados').innerHTML = `<span style="color:#e74c3c">Erro ao consultar Firestore:<br>${e.message}</span>`;
-    return;
-  }
-  if (!doc.exists) {
-    document.getElementById('dados').innerHTML = 'Relatório não encontrado.';
+    const doc = await db.collection("avaliacoes").doc(id).get();
+    if (!doc.exists) throw new Error("Relatório não encontrado!");
+    relatorio = doc.data();
+  } catch (err) {
+    document.body.innerHTML = `<main class='container'><h2>Erro: ${err.message}</h2></main>`;
     return;
   }
 
-  const dados = doc.data();
+  // Exibe campos principais
+  document.getElementById("periodo").textContent = relatorio.periodo || "-";
+  document.getElementById("campanha").textContent = relatorio.campanha || "-";
+  document.getElementById("protocolo").textContent = relatorio.protocolo || "-";
+  document.getElementById("numero").textContent = relatorio.numero || "-";
+  document.getElementById("datalig").textContent = formatarData(relatorio.datalig);
+  document.getElementById("qualif").textContent = relatorio.qualif || "-";
+  document.getElementById("sdr").textContent = relatorio.sdr || "-";
+  document.getElementById("createdAt").textContent = formatarData(relatorio.createdAt);
+  document.getElementById("nota").textContent = relatorio.nota || "-";
 
-  // Espelha TODOS os campos do formulário
-  document.getElementById('dados').innerHTML = `
-    <strong>SDR:</strong> ${dados.sdr || ''}<br>
-    <strong>Período apurado:</strong> ${dados.periodo || ''}<br>
-    <strong>Campanha:</strong> ${dados.campanha || ''}<br>
-    <strong>Protocolo:</strong> ${dados.protocolo || ''}<br>
-    <strong>Número:</strong> ${dados.numero || ''}<br>
-    <strong>Data da ligação:</strong> ${dados.datalig || ''}<br>
-    <strong>Qualificação:</strong> ${dados.qualif || ''}
+  // Exibe resumo nota & distribuição
+  const rc = relatorio.resumoCriterios || {};
+  document.getElementById("resumo-calculo").innerHTML = `
+    <strong>Nota calculada:</strong> ${Number(relatorio.notaFinal).toFixed(2)} / 10<br>
+    <strong>Distribuição de Avaliações:</strong><br>
+    ✔️ OK: ${rc.percentOk || "0.0"}%<br>
+    ⚠️ Parcial: ${rc.percentParcial || "0.0"}%<br>
+    ❌ Faltou: ${rc.percentFaltou || "0.0"}%<br>
+    ❎ Anulada: ${rc.anulada || 0}
   `;
 
-  // Cálculo e exibição da nota + distribuição de avaliações
-  let nota = 0;
-  let resumo = dados.resumoCriterios;
-  if (dados.notaFinal !== undefined) {
-    nota = Number(dados.notaFinal);
-  }
-  if (!resumo && dados.criterios && typeof dados.criterios === "object") {
-    // Calcula o resumo na hora se não vier salvo
-    const contagem = { "✔️ OK":0, "⚠️ Parcial":0, "❌ Faltou":0, "❎ Anulada":0 };
-    let soma = 0, total = 0;
-    Object.values(dados.criterios).forEach(c => {
-      if (c.avaliacao !== "❎ Anulada") total++;
-      if (contagem[c.avaliacao] !== undefined) contagem[c.avaliacao]++;
-      if (c.avaliacao === "✔️ OK") soma++;
-      if (c.avaliacao === "⚠️ Parcial") soma += 0.5;
-    });
-    nota = total > 0 ? (soma / total) * 10 : 0;
-    resumo = {
-      ok: contagem["✔️ OK"],
-      parcial: contagem["⚠️ Parcial"],
-      faltou: contagem["❌ Faltou"],
-      anulada: contagem["❎ Anulada"],
-      total,
-      percentOk: total > 0 ? ((contagem["✔️ OK"] / total) * 100).toFixed(1) : "0.0",
-      percentParcial: total > 0 ? ((contagem["⚠️ Parcial"] / total) * 100).toFixed(1) : "0.0",
-      percentFaltou: total > 0 ? ((contagem["❌ Faltou"] / total) * 100).toFixed(1) : "0.0",
-      percentAnulada: total > 0 ? ((contagem["❎ Anulada"] / total) * 100).toFixed(1) : "0.0"
-    };
+  // Exibe critérios detalhados (ordem garantida)
+  const lista = document.getElementById("lista-criterios");
+  lista.innerHTML = "";
+  let criterios = relatorio.criterios || [];
+  // Caso retrocompatibilidade, converte objeto para array
+  if (!Array.isArray(criterios)) {
+    criterios = criteriosNomes.map(nome => ({
+      nome,
+      ...(criterios[nome] || {})
+    }));
   }
 
-  document.getElementById('resumo-calculo').innerHTML = `
-    <div><strong>Nota calculada:</strong> ${nota.toFixed(1)} / 10</div>
-    <div>
-      <strong>Distribuição de Avaliações:</strong><br>
-      ✔️ OK: ${resumo.percentOk}%<br>
-      ⚠️ Parcial: ${resumo.percentParcial}%<br>
-      ❌ Faltou: ${resumo.percentFaltou}%<br>
-      ❎ Anulada: ${resumo.anulada || 0}
-    </div>
-  `;
+  criteriosNomes.forEach(nome => {
+    const c = criterios.find(c => c.nome === nome) || { avaliacao: "-", observacao: "-" };
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${nome}</td>
+      <td>${c.avaliacao || "-"}</td>
+      <td>${c.observacao || "-"}</td>
+    `;
+    lista.appendChild(tr);
+  });
 
-  document.getElementById('titulo').innerText = dados.titulo || '';
-
-  // Renderiza critérios
-  const container = document.getElementById("conteudo");
-  container.innerHTML = "";
-  const cores = {
-    "✔️ OK": "cor-ok",
-    "⚠️ Parcial": "cor-parcial",
-    "❌ Faltou": "cor-faltou",
-    "❎ Anulada": "cor-anulada"
-  };
-  if (dados.criterios && typeof dados.criterios === "object") {
-    Object.entries(dados.criterios).forEach(([criterio, obj]) => {
-      const bloco = document.createElement("div");
-      bloco.className = `crit ${cores[obj.avaliacao] || ""}`;
-      bloco.innerHTML = `
-        <h3>${criterio} — ${obj.avaliacao}</h3>
-        <p>${obj.observacao || 'Sem observações.'}</p>
-      `;
-      container.appendChild(bloco);
-    });
-  }
-
-  // Recomendações finais (campo "nota")
-  if (dados.nota) {
-    const recomendacoesDiv = document.createElement("div");
-    recomendacoesDiv.className = "recomendacoes-finais";
-    recomendacoesDiv.innerHTML = `<h3>Recomendações Finais</h3><p>${dados.nota}</p>`;
-    container.appendChild(recomendacoesDiv);
-  }
-
-  // Busca os últimos 5 relatórios desse SDR para curva de aprendizado
-  let curvaSnapshot;
-  try {
-    curvaSnapshot = await db.collection('avaliacoes')
-      .where('sdr', '==', dados.sdr)
-      .orderBy('createdAt', 'desc')
-      .limit(5)
-      .get();
-  } catch (e) {
-    document.getElementById('grafico').style.display = 'none';
-    return;
-  }
-
-  const curvaDocs = curvaSnapshot.docs.reverse();
-  const labels = [];
-  const notas = [];
-
-  curvaDocs.forEach(docCurva => {
-    const data = docCurva.data();
-    let label = '';
-    if (data.createdAt) {
-      label = new Date(data.createdAt).toLocaleDateString('pt-BR');
-    } else if (data.periodo) {
-      label = data.periodo;
-    }
-    // Calcula nota da curva se não vier salva
-    let notaCurva = 0;
-    if (data.notaFinal !== undefined) {
-      notaCurva = Number(data.notaFinal);
-    } else if (data.criterios && typeof data.criterios === "object") {
-      let soma = 0, total = 0;
-      Object.values(data.criterios).forEach(c => {
-        if (c.avaliacao !== "❎ Anulada") total++;
-        if (c.avaliacao === "✔️ OK") soma++;
-        if (c.avaliacao === "⚠️ Parcial") soma += 0.5;
+  // Gráfico curva de aprendizado: últimos 5 relatórios deste SDR
+  if (relatorio.sdr) {
+    try {
+      const query = await db.collection("avaliacoes")
+        .where("sdr", "==", relatorio.sdr)
+        .orderBy("createdAt", "desc")
+        .limit(5)
+        .get();
+      const dados = [];
+      query.forEach(doc => {
+        const r = doc.data();
+        dados.unshift({ // unshift: mais antigo à esquerda
+          data: r.periodo || formatarData(r.createdAt),
+          nota: Number(r.notaFinal) || 0
+        });
       });
-      notaCurva = total > 0 ? (soma / total) * 10 : 0;
-    }
-    labels.push(label);
-    notas.push(notaCurva);
-  });
-
-  // Gráfico de linha - curva de aprendizado
-  const ctx = document.getElementById('grafico').getContext('2d');
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Nota Final',
-        data: notas,
-        fill: false,
-        borderColor: '#3498db',
-        backgroundColor: '#3498db',
-        tension: 0.2,
-        pointRadius: 6,
-        pointBackgroundColor: '#fff',
-        pointBorderColor: '#3498db'
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        x: { title: { display: true, text: 'Avaliação' } },
-        y: { title: { display: true, text: 'Nota' }, min: 0, max: 10 }
+      // Renderiza gráfico se houver mais de 1 dado
+      if (dados.length > 1) {
+        const ctx = document.getElementById("grafico-aprendizado").getContext("2d");
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: dados.map(d => d.data),
+            datasets: [{
+              label: "Nota Final",
+              data: dados.map(d => d.nota),
+              fill: false,
+              tension: 0.2
+            }]
+          },
+          options: {
+            responsive: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                suggestedMax: 10
+              }
+            }
+          }
+        });
       }
-    }
-  });
+    } catch {}
+  }
 });

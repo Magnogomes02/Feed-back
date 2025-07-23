@@ -1,104 +1,103 @@
 // js/formulario.js
 
-const criterios = [
-  "Identificação de perfil (PIT)",
-  "Abertura e Rapport",
-  "Apresentação de valor",
-  "Convocação do analista fiscal",
-  "Gestão de objeções",
-  "Próximo passo definido",
-  "Tom e linguagem",
-  "Abordagem de Vendas",
-  "Técnica no agendamento",
-  "Efetividade",
-  "Cordialidade e Relacionamento",
-  "Prova social",
-  "Qualificação de Leads",
-  "Tempo de Resposta"
-];
+document.addEventListener("DOMContentLoaded", () => {
+  const criteriosNomes = [
+    "Identificação de perfil (PIT)",
+    "Abertura e Rapport",
+    "Apresentação de valor",
+    "Convocação do analista fiscal",
+    "Gestão de objeções",
+    "Próximo passo definido",
+    "Tom e linguagem",
+    "Abordagem de Vendas",
+    "Técnica no agendamento",
+    "Efetividade",
+    "Cordialidade e Relacionamento",
+    "Prova social",
+    "Qualificação de Leads",
+    "Tempo de Resposta"
+  ];
 
-// Preenche a tabela de critérios dinamicamente
-(function populaTabela() {
+  // Gera as linhas da tabela de critérios
   const tbody = document.getElementById("criterios");
-  criterios.forEach((nome, index) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${index + 1} - ${nome}</td>
+  criteriosNomes.forEach(nome => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${nome}</td>
       <td>
-        <select name="aval_${index}" required>
+        <select name="avaliacao-${nome}" required>
+          <option value="">Selecione</option>
           <option value="✔️ OK">✔️ OK</option>
           <option value="⚠️ Parcial">⚠️ Parcial</option>
           <option value="❌ Faltou">❌ Faltou</option>
           <option value="❎ Anulada">❎ Anulada</option>
         </select>
       </td>
-      <td><textarea name="obs_${index}" rows="2"></textarea></td>
+      <td>
+        <input type="text" name="comentario-${nome}" placeholder="Observação">
+      </td>
     `;
-    tbody.appendChild(row);
-  });
-})();
-
-document.getElementById("feedbackForm").addEventListener("submit", async function(e) {
-  e.preventDefault();
-  const data = new FormData(this);
-
-  // Monta o objeto dos critérios
-  const avaliacoes = {};
-  const contagem = { "✔️ OK":0, "⚠️ Parcial":0, "❌ Faltou":0, "❎ Anulada":0 };
-
-  criterios.forEach((nome, index) => {
-    const avaliacao = data.get(`aval_${index}`);
-    const observacao = data.get(`obs_${index}`) || "";
-    avaliacoes[nome] = { avaliacao, observacao };
-    if (contagem[avaliacao] !== undefined) contagem[avaliacao]++;
+    tbody.appendChild(tr);
   });
 
-  // Calcula a nota
-  let soma = 0, total = 0;
-  Object.values(avaliacoes).forEach(c => {
-    if (c.avaliacao !== "❎ Anulada") total++;
-    if (c.avaliacao === "✔️ OK") soma++;
-    if (c.avaliacao === "⚠️ Parcial") soma += 0.5;
+  // Salva o formulário no Firestore
+  document.getElementById("feedbackForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const db = firebase.firestore();
+    const form = e.target;
+
+    // Monta critérios como array
+    const criterios = criteriosNomes.map(nome => ({
+      nome,
+      avaliacao: form[`avaliacao-${nome}`].value,
+      observacao: form[`comentario-${nome}`].value
+    }));
+
+    // Calcula nota e resumo
+    const contagem = { "✔️ OK": 0, "⚠️ Parcial": 0, "❌ Faltou": 0, "❎ Anulada": 0 };
+    criterios.forEach(c => {
+      if (contagem[c.avaliacao] !== undefined) contagem[c.avaliacao]++;
+    });
+    const total = criterios.length;
+    const notaFinal = total > 0
+      ? ((contagem["✔️ OK"] * 1 + contagem["⚠️ Parcial"] * 0.6) / total * 10)
+      : 0;
+
+    // Resumo de critérios para gráficos e exibição
+    const resumoCriterios = {
+      ok: contagem["✔️ OK"],
+      parcial: contagem["⚠️ Parcial"],
+      faltou: contagem["❌ Faltou"],
+      anulada: contagem["❎ Anulada"],
+      percentOk: ((contagem["✔️ OK"] / total) * 100).toFixed(1),
+      percentParcial: ((contagem["⚠️ Parcial"] / total) * 100).toFixed(1),
+      percentFaltou: ((contagem["❌ Faltou"] / total) * 100).toFixed(1),
+      percentAnulada: ((contagem["❎ Anulada"] / total) * 100).toFixed(1),
+      total
+    };
+
+    // Monta objeto para salvar
+    const registro = {
+      sdr: form.sdr.value,
+      periodo: form.periodo.value,
+      campanha: form.campanha.value,
+      protocolo: form.protocolo.value,
+      numero: form.numero.value,
+      datalig: form.datalig.value,
+      qualif: form.qualif.value,
+      criterios, // agora array de objetos!
+      resumoCriterios,
+      nota: form.nota.value,
+      notaFinal: Number(notaFinal.toFixed(2)),
+      createdAt: new Date().toISOString()
+    };
+
+    // Salva no Firestore e redireciona para o relatório
+    try {
+      const docRef = await db.collection("avaliacoes").add(registro);
+      window.location.href = "relatorio.html?id=" + docRef.id;
+    } catch (err) {
+      alert("Erro ao salvar no Firebase: " + err.message);
+    }
   });
-  const notaFinal = total > 0 ? (soma / total) * 10 : 0;
-
-  // Calcula o resumo dos critérios
-  const resumoCriterios = {
-    ok: contagem["✔️ OK"],
-    parcial: contagem["⚠️ Parcial"],
-    faltou: contagem["❌ Faltou"],
-    anulada: contagem["❎ Anulada"],
-    total,
-    percentOk: total > 0 ? ((contagem["✔️ OK"] / total) * 100).toFixed(1) : "0.0",
-    percentParcial: total > 0 ? ((contagem["⚠️ Parcial"] / total) * 100).toFixed(1) : "0.0",
-    percentFaltou: total > 0 ? ((contagem["❌ Faltou"] / total) * 100).toFixed(1) : "0.0",
-    percentAnulada: total > 0 ? ((contagem["❎ Anulada"] / total) * 100).toFixed(1) : "0.0"
-  };
-
-  // Dados gerais
-  const registro = {
-    sdr:      data.get("sdr"),
-    periodo:  data.get("periodo"),
-    campanha: data.get("campanha"),
-    protocolo:data.get("protocolo"),
-    numero:   data.get("numero"),
-    datalig:  data.get("datalig"),
-    qualif:   data.get("qualif"),
-    nota:     data.get("nota") || "",
-    criterios: avaliacoes,
-    notaFinal,
-    resumoCriterios,
-    createdAt: new Date().toISOString()
-  };
-
-  // Salva em localStorage para uso imediato (opcional)
-  localStorage.setItem("relatorioSDR", JSON.stringify(registro));
-
-  // Salva no Firestore
-  try {
-    const docRef = await db.collection("avaliacoes").add(registro);
-    window.location.href = "relatorio.html?id=" + docRef.id;
-  } catch (err) {
-    alert("Erro ao salvar no Firebase: " + err.message);
-  }
 });

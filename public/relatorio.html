@@ -7,33 +7,48 @@
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <header class="site-header">
-  </header>
-  <nav class="site-nav"></nav>
+  <nav class="menu"></nav>
+
   <main class="container">
-  <h1>Relatório de Feedback - SDR</h1>
-  <section id="relatorioSDR">
-    <div class="flex-container">
-      <div class="box" id="dados"></div>
-      <div class="resumo" id="resumo-calculo"></div>
-    </div>
-    <h2 id="titulo" style="margin-bottom: 1rem; color: #3498db; font-size: 1.3rem;"></h2>
-    <div id="conteudo" style="margin-bottom: 2rem;"></div>
-    <div style="text-align:center; margin-bottom: 2rem;">
-      <canvas id="grafico" width="400" height="160"></canvas>
-    </div>
-  </section>
-  <button id="voltarBtn" class="btn" onclick="window.location.href='index.html'" style="margin-top: 1rem;">
-    Voltar ao Início
-  </button>
-</main>
+    <h1>Relatório de Feedback - SDR</h1>
+    
+    <section class="relatorio-info-superior">
+      <div id="info-principal"></div>
+      <div id="resumo-calculo"></div>
+    </section>
+    
+    <section class="grafico-curva-aprendizado">
+      <canvas id="grafico-aprendizado" width="400" height="180"></canvas>
+    </section>
+
+    <section>
+      <h2>Critérios Avaliados</h2>
+      <table class="tabela-criterios">
+        <thead>
+          <tr>
+            <th>Critério</th>
+            <th>Avaliação</th>
+            <th>Comentário</th>
+          </tr>
+        </thead>
+        <tbody id="criterios-relatorio"></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Recomendações Finais</h2>
+      <div id="nota-final"></div>
+    </section>
+  </main>
+
+  <!-- Scripts Firebase + projeto -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/menu.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="js/relatorio.js"></script>
 </body>
 </html>
