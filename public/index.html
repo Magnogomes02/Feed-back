@@ -2,39 +2,37 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Painel de Relatórios – CubboTech Feedback</title>
+  <title>Painel de Relatórios - CubboTech Feedback</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <!-- Menu (inclui logo/banner CubboTech) -->
   <nav class="menu"></nav>
   
   <main class="container">
-    <h1>Painel de Relatórios</h1>
-    <div class="painel-controles">
-      <input type="text" id="filtroBusca" placeholder="Buscar por SDR, protocolo, período, qualificação, número...">
-      <button id="btnBuscar">Buscar</button>
-    </div>
-    <div id="relatorios-encontrados">
-      <table class="tabela-relatorios">
-        <thead>
-          <tr>
-            <th>SDR</th>
-            <th>Período Apurado</th>
-            <th>Data da Ligação</th>
-            <th>Protocolo</th>
-            <th>Data de Criação</th>
-            <th>Nota Final</th>
-            <th>Ver</th>
-          </tr>
-        </thead>
-        <tbody id="lista-relatorios"></tbody>
-      </table>
-      <div id="nenhum-relatorio" style="display:none; text-align:center; margin-top:2rem;">
-        Nenhum relatório encontrado.
+    <h1>Relatórios Encontrados</h1>
+    <section>
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.2rem;">
+        <input type="text" id="busca" placeholder="Buscar por SDR, protocolo ou período..." style="flex: 1 1 240px; max-width: 350px;">
+        <button id="btnBuscar" class="btn">Buscar</button>
       </div>
-    </div>
+      <div style="overflow-x:auto;">
+        <table class="tabela-relatorios">
+          <thead>
+            <tr>
+              <th>SDR</th>
+              <th>Período apurado</th>
+              <th>Data da ligação</th>
+              <th>Protocolo</th>
+              <th>Data de Criação</th>
+              <th>Nota Final</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-relatorios"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <!-- Scripts Firebase + projeto -->

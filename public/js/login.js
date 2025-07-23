@@ -1,4 +1,3 @@
-// js/login.js
 const form = document.getElementById('loginForm');
 const mensagem = document.getElementById('mensagem');
 form.addEventListener('submit', async e => {

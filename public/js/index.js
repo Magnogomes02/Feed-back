@@ -1,79 +1,77 @@
-// index.js
+// js/index.js
+
 document.addEventListener("DOMContentLoaded", async () => {
   const db = firebase.firestore();
-  const listaRelatorios = document.getElementById("lista-relatorios");
-  const nenhumRelatorio = document.getElementById("nenhum-relatorio");
-  const filtroBusca = document.getElementById("filtroBusca");
+  const tbody = document.getElementById("lista-relatorios");
+  const buscaInput = document.getElementById("busca");
   const btnBuscar = document.getElementById("btnBuscar");
 
-  // Busca relatórios do Firestore
-  async function carregarRelatorios(filtro = "") {
-    listaRelatorios.innerHTML = "";
-    let query = db.collection("avaliacoes").orderBy("createdAt", "desc");
-    let snapshot;
+  // Utilitário: formata data
+  function formatarData(dt) {
+    if (!dt) return "-";
+    const d = new Date(dt);
+    return isNaN(d) ? "-" : d.toLocaleString("pt-BR");
+  }
+
+  // Busca e lista relatórios
+  let relatorios = [];
+
+  async function carregarRelatorios() {
+    tbody.innerHTML = `<tr><td colspan="7">Carregando...</td></tr>`;
     try {
-      snapshot = await query.get();
+      const query = await db.collection("avaliacoes")
+        .orderBy("createdAt", "desc")
+        .limit(100)
+        .get();
+      relatorios = [];
+      query.forEach(doc => {
+        const r = doc.data();
+        relatorios.push({ id: doc.id, ...r });
+      });
+      renderizarRelatorios(relatorios);
     } catch (err) {
-      listaRelatorios.innerHTML = "<tr><td colspan='7'>Erro ao buscar relatórios: " + err.message + "</td></tr>";
+      tbody.innerHTML = `<tr><td colspan="7">Erro ao carregar relatórios.</td></tr>`;
+    }
+  }
+
+  // Renderiza a tabela
+  function renderizarRelatorios(lista) {
+    if (!lista.length) {
+      tbody.innerHTML = `<tr><td colspan="7">Nenhum relatório encontrado.</td></tr>`;
       return;
     }
-
-    let relatorios = [];
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      // Aplicar filtro simples por SDR, protocolo, período, qualificação ou número
-      const busca = filtro.toLowerCase();
-      if (
-        !filtro ||
-        (data.sdr && data.sdr.toLowerCase().includes(busca)) ||
-        (data.protocolo && data.protocolo.toLowerCase().includes(busca)) ||
-        (data.periodo && data.periodo.toLowerCase().includes(busca)) ||
-        (data.qualif && data.qualif.toLowerCase().includes(busca)) ||
-        (data.numero && data.numero.toLowerCase().includes(busca))
-      ) {
-        relatorios.push({ ...data, id: doc.id });
-      }
-    });
-
-    if (relatorios.length === 0) {
-      nenhumRelatorio.style.display = "block";
-      return;
-    } else {
-      nenhumRelatorio.style.display = "none";
-    }
-
-    relatorios.forEach(r => {
+    tbody.innerHTML = "";
+    lista.forEach(r => {
       const tr = document.createElement("tr");
-
-      // Formatações de datas
-      const dataLig = r.datalig ? new Date(r.datalig).toLocaleString("pt-BR") : "-";
-      const dataCriacao = r.createdAt ? new Date(r.createdAt).toLocaleString("pt-BR") : "-";
-      const nota = r.notaFinal !== undefined ? Number(r.notaFinal).toFixed(2) : "-";
-
       tr.innerHTML = `
         <td>${r.sdr || "-"}</td>
         <td>${r.periodo || "-"}</td>
-        <td>${dataLig}</td>
+        <td>${r.datalig ? formatarData(r.datalig) : "-"}</td>
         <td>${r.protocolo || "-"}</td>
-        <td>${dataCriacao}</td>
-        <td class="nota-tabela">${nota}</td>
+        <td>${r.createdAt ? formatarData(r.createdAt) : "-"}</td>
+        <td class="nota-tabela">${typeof r.notaFinal === "number" ? r.notaFinal.toFixed(2) : "-"}</td>
         <td>
-          <a href="relatorio.html?id=${r.id}" class="btn btn-ver" title="Ver Relatório">Ver</a>
+          <a href="relatorio.html?id=${r.id}" class="btn-ver">Ver</a>
         </td>
       `;
-      listaRelatorios.appendChild(tr);
+      tbody.appendChild(tr);
     });
   }
 
-  // Filtro por busca
-  btnBuscar.addEventListener("click", () => {
-    carregarRelatorios(filtroBusca.value);
-  });
+  // Filtro/busca
+  function filtrar() {
+    const termo = (buscaInput.value || "").toLowerCase();
+    const filtrados = relatorios.filter(r =>
+      (r.sdr || "").toLowerCase().includes(termo) ||
+      (r.protocolo || "").toLowerCase().includes(termo) ||
+      (r.periodo || "").toLowerCase().includes(termo)
+    );
+    renderizarRelatorios(filtrados);
+  }
 
-  filtroBusca.addEventListener("keyup", e => {
-    if (e.key === "Enter") carregarRelatorios(filtroBusca.value);
-  });
+  btnBuscar.addEventListener("click", filtrar);
+  buscaInput.addEventListener("keypress", e => { if (e.key === "Enter") filtrar(); });
 
-  // Carrega todos ao abrir
+  // Carrega na inicialização
   carregarRelatorios();
 });

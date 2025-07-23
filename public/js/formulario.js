@@ -1,6 +1,11 @@
 // js/formulario.js
 
 document.addEventListener("DOMContentLoaded", () => {
+  const db = firebase.firestore();
+  const form = document.getElementById("feedbackForm");
+  const tbody = document.getElementById("criterios");
+
+  // Ordem e nomes dos critérios (ajuste aqui se quiser trocar!)
   const criteriosNomes = [
     "Identificação de perfil (PIT)",
     "Abertura e Rapport",
@@ -18,52 +23,57 @@ document.addEventListener("DOMContentLoaded", () => {
     "Tempo de Resposta"
   ];
 
-  // Gera as linhas da tabela de critérios
-  const tbody = document.getElementById("criterios");
-  criteriosNomes.forEach(nome => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${nome}</td>
-      <td>
-        <select name="avaliacao-${nome}" required>
-          <option value="">Selecione</option>
-          <option value="✔️ OK">✔️ OK</option>
-          <option value="⚠️ Parcial">⚠️ Parcial</option>
-          <option value="❌ Faltou">❌ Faltou</option>
-          <option value="❎ Anulada">❎ Anulada</option>
-        </select>
-      </td>
-      <td>
-        <input type="text" name="comentario-${nome}" placeholder="Observação">
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+  // Renderiza linhas para os critérios
+  function renderizaCriterios() {
+    tbody.innerHTML = "";
+    criteriosNomes.forEach((nome, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>${nome}</strong></td>
+        <td>
+          <select name="criterio-avaliacao-${idx}" required>
+            <option value="">Selecione</option>
+            <option value="✔️ OK">✔️ OK</option>
+            <option value="⚠️ Parcial">⚠️ Parcial</option>
+            <option value="❌ Faltou">❌ Faltou</option>
+            <option value="❎ Anulada">❎ Anulada</option>
+          </select>
+        </td>
+        <td>
+          <textarea name="criterio-observacao-${idx}" rows="2" required></textarea>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
-  // Salva o formulário no Firestore
-  document.getElementById("feedbackForm").addEventListener("submit", async (e) => {
+  renderizaCriterios();
+
+  // Ao submeter formulário
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const db = firebase.firestore();
-    const form = e.target;
+    form.querySelector("button[type=submit]").disabled = true;
 
-    // Monta critérios como array
-    const criterios = criteriosNomes.map(nome => ({
+    // Monta o objeto criterios como array
+    const criterios = criteriosNomes.map((nome, idx) => ({
       nome,
-      avaliacao: form[`avaliacao-${nome}`].value,
-      observacao: form[`comentario-${nome}`].value
+      avaliacao: form[`criterio-avaliacao-${idx}`].value,
+      observacao: form[`criterio-observacao-${idx}`].value
     }));
 
-    // Calcula nota e resumo
-    const contagem = { "✔️ OK": 0, "⚠️ Parcial": 0, "❌ Faltou": 0, "❎ Anulada": 0 };
-    criterios.forEach(c => {
-      if (contagem[c.avaliacao] !== undefined) contagem[c.avaliacao]++;
-    });
+    // Calcula resumo de notas
+    const contagem = {
+      "✔️ OK": 0,
+      "⚠️ Parcial": 0,
+      "❌ Faltou": 0,
+      "❎ Anulada": 0
+    };
+    criterios.forEach(c => contagem[c.avaliacao]++);
     const total = criterios.length;
     const notaFinal = total > 0
       ? ((contagem["✔️ OK"] * 1 + contagem["⚠️ Parcial"] * 0.6) / total * 10)
       : 0;
 
-    // Resumo de critérios para gráficos e exibição
     const resumoCriterios = {
       ok: contagem["✔️ OK"],
       parcial: contagem["⚠️ Parcial"],
@@ -76,8 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
       total
     };
 
-    // Monta objeto para salvar
-    const registro = {
+    // Monta dados do formulário
+    const dados = {
       sdr: form.sdr.value,
       periodo: form.periodo.value,
       campanha: form.campanha.value,
@@ -85,19 +95,22 @@ document.addEventListener("DOMContentLoaded", () => {
       numero: form.numero.value,
       datalig: form.datalig.value,
       qualif: form.qualif.value,
-      criterios, // agora array de objetos!
-      resumoCriterios,
+      criterios,
       nota: form.nota.value,
-      notaFinal: Number(notaFinal.toFixed(2)),
+      notaFinal,
+      resumoCriterios,
       createdAt: new Date().toISOString()
     };
 
-    // Salva no Firestore e redireciona para o relatório
+    // Salva no Firestore
     try {
-      const docRef = await db.collection("avaliacoes").add(registro);
-      window.location.href = "relatorio.html?id=" + docRef.id;
+      const doc = await db.collection("avaliacoes").doc(dados.protocolo).set(dados);
+      // Redireciona para o relatório criado
+      window.location.href = `relatorio.html?id=${dados.protocolo}`;
     } catch (err) {
-      alert("Erro ao salvar no Firebase: " + err.message);
+      alert("Erro ao salvar no Firebase: " + (err.message || err));
+    } finally {
+      form.querySelector("button[type=submit]").disabled = false;
     }
   });
 });

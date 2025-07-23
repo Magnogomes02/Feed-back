@@ -8,36 +8,37 @@
 </head>
 <body>
   <nav class="menu"></nav>
-
+  
   <main class="container">
     <h1>Relatório de Feedback - SDR</h1>
-    
-    <section class="relatorio-info-superior">
-      <div id="info-principal"></div>
-      <div id="resumo-calculo"></div>
-    </section>
-    
-    <section class="grafico-curva-aprendizado">
-      <canvas id="grafico-aprendizado" width="400" height="180"></canvas>
-    </section>
-
-    <section>
-      <h2>Critérios Avaliados</h2>
-      <table class="tabela-criterios">
-        <thead>
-          <tr>
-            <th>Critério</th>
-            <th>Avaliação</th>
-            <th>Comentário</th>
-          </tr>
-        </thead>
-        <tbody id="criterios-relatorio"></tbody>
-      </table>
+    <section id="info-relatorio">
+      <div class="relatorio-superior">
+        <div class="info-bloco">
+          <strong>Período apurado:</strong> <span id="periodo"></span><br>
+          <strong>Campanha:</strong> <span id="campanha"></span><br>
+          <strong>Protocolo:</strong> <span id="protocolo"></span><br>
+          <strong>Número:</strong> <span id="numero"></span><br>
+          <strong>Data da ligação:</strong> <span id="datalig"></span><br>
+          <strong>Qualificação:</strong> <span id="qualif"></span>
+        </div>
+        <div class="info-bloco nota-bloco">
+          <div id="resumo-calculo"></div>
+          <canvas id="grafico-aprendizado" width="300" height="150"></canvas>
+        </div>
+      </div>
+      <div class="info-sdr">
+        <strong>SDR:</strong> <span id="sdr"></span> &nbsp; | &nbsp; 
+        <strong>Data de Criação:</strong> <span id="createdAt"></span>
+      </div>
     </section>
 
-    <section>
-      <h2>Recomendações Finais</h2>
-      <div id="nota-final"></div>
+    <section id="criterios-relatorio">
+      <h2>Detalhamento dos Critérios</h2>
+      <div id="lista-criterios"></div>
+      <div class="recomendacoes">
+        <strong>Recomendações Finais:</strong>
+        <div id="nota"></div>
+      </div>
     </section>
   </main>
 

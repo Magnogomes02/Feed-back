@@ -8,7 +8,7 @@
 </head>
 <body>
   <nav class="menu"></nav>
-  
+
   <main class="container">
     <h1>Formulário de Feedback - SDR</h1>
     <form id="feedbackForm">
@@ -24,26 +24,30 @@
       </label>
 
       <label>Período apurado:
-        <input type="text" name="periodo" required>
+        <input type="text" name="periodo" required placeholder="Ex: 01/07/2025 - 08/07/2025">
       </label>
+
       <label>Campanha:
         <input type="text" name="campanha" value="Ligação Manual" required>
       </label>
+
       <label>Protocolo:
         <input type="text" name="protocolo" required>
       </label>
+
       <label>Número:
         <input type="text" name="numero" required>
       </label>
+
       <label>Data da ligação:
         <input type="datetime-local" name="datalig" required>
       </label>
+
       <label>Qualificação:
         <input type="text" name="qualif" required>
       </label>
 
-      <!-- Tabela dinâmica dos critérios -->
-      <table>
+      <table class="tabela-criterios">
         <thead>
           <tr>
             <th>Critério</th>
@@ -53,3 +57,22 @@
         </thead>
         <tbody id="criterios"></tbody>
       </table>
+
+      <label>Recomendações Finais:
+        <textarea name="nota" rows="5"></textarea>
+      </label>
+
+      <button type="submit" class="btn">Gerar Relatório</button>
+    </form>
+  </main>
+
+  <!-- Scripts Firebase + projeto -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/formulario.js"></script>
+</body>
+</html>

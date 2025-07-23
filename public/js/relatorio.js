@@ -71,11 +71,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     ❎ Anulada: ${rc.anulada || 0}
   `;
 
-  // Exibe critérios detalhados (ordem garantida)
+  // Exibe critérios detalhados como cards coloridos (ordem garantida)
   const lista = document.getElementById("lista-criterios");
   lista.innerHTML = "";
   let criterios = relatorio.criterios || [];
-  // Caso retrocompatibilidade, converte objeto para array
+  // Retrocompatibilidade: converte objeto para array se necessário
   if (!Array.isArray(criterios)) {
     criterios = criteriosNomes.map(nome => ({
       nome,
@@ -85,13 +85,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   criteriosNomes.forEach(nome => {
     const c = criterios.find(c => c.nome === nome) || { avaliacao: "-", observacao: "-" };
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${nome}</td>
-      <td>${c.avaliacao || "-"}</td>
-      <td>${c.observacao || "-"}</td>
+
+    // Define classe de cor para a avaliação
+    let classe = "criterio-card";
+    if (c.avaliacao === "✔️ OK") classe += " criterio-ok";
+    else if (c.avaliacao === "⚠️ Parcial") classe += " criterio-parcial";
+    else if (c.avaliacao === "❌ Faltou") classe += " criterio-faltou";
+    else if (c.avaliacao === "❎ Anulada") classe += " criterio-anulada";
+
+    // Monta o card
+    const div = document.createElement("div");
+    div.className = classe;
+    div.innerHTML = `
+      <div>
+        <strong>${nome}</strong><br>
+        <span><strong>Avaliação:</strong> ${c.avaliacao || "-"}</span><br>
+        <span><strong>Comentários:</strong> ${c.observacao || "-"}</span>
+      </div>
     `;
-    lista.appendChild(tr);
+    lista.appendChild(div);
   });
 
   // Gráfico curva de aprendizado: últimos 5 relatórios deste SDR
@@ -105,12 +117,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const dados = [];
       query.forEach(doc => {
         const r = doc.data();
-        dados.unshift({ // unshift: mais antigo à esquerda
+        dados.unshift({ // mais antigo à esquerda
           data: r.periodo || formatarData(r.createdAt),
           nota: Number(r.notaFinal) || 0
         });
       });
-      // Renderiza gráfico se houver mais de 1 dado
       if (dados.length > 1) {
         const ctx = document.getElementById("grafico-aprendizado").getContext("2d");
         new Chart(ctx, {
@@ -121,7 +132,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               label: "Nota Final",
               data: dados.map(d => d.nota),
               fill: false,
-              tension: 0.2
+              tension: 0.2,
+              borderColor: "#157afe",
+              backgroundColor: "#157afe"
             }]
           },
           options: {

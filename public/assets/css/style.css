@@ -8,7 +8,7 @@ body, input, select, textarea, button {
 }
 
 .container {
-  max-width: 980px;
+  max-width: max-content;
   margin: 40px auto 0 auto;
   background: #fff;
   border-radius: 14px;
@@ -27,7 +27,7 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  background: #12105e;
   padding: 16px 32px;
   border-bottom: 2px solid #e6ecf2;
   box-shadow: 0 2px 8px rgba(10,49,80,0.03);
@@ -120,20 +120,22 @@ th {
 
 /* Botões */
 .btn, .btn-ver {
-  background: #157afe;
+  background: linear-gradient(90deg, #157afe, #0a54a0 90%);
   color: #fff;
   border: none;
   border-radius: 8px;
   padding: 8px 20px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
   text-decoration: none;
   display: inline-block;
+  box-shadow: 0 2px 8px rgba(10,49,80,0.07);
 }
 
 .btn:hover, .btn-ver:hover {
-  background: #0A3150;
+  background: linear-gradient(90deg, #0A3150, #157afe 90%);
+  box-shadow: 0 4px 20px rgba(10,49,80,0.13);
 }
 
 /* Inputs e selects */
@@ -175,6 +177,107 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
   text-align: center;
 }
 
+/* Recomendações finais */
+.recomendacoes {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f5f7fa;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  color: #0A3150;
+}
+
+/* Cards/linhas de critério do relatório */
+.criterio-card {
+  padding: 1.2rem 1.5rem;
+  margin: 1rem 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(10,49,80,0.07);
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  border-left: 6px solid #f5f7fa; /* padrão neutro, sobrescrito pelas classes específicas abaixo */
+  background: #fff;
+}
+
+/* Borda de cor conforme avaliação */
+.criterio-ok {
+  border-left: 6px solid #27ae60;   /* Verde */
+  background: #f6fbf8;
+}
+.criterio-parcial {
+  border-left: 6px solid #f1c40f;   /* Amarelo */
+  background: #fffbe7;
+}
+.criterio-faltou {
+  border-left: 6px solid #e74c3c;   /* Vermelho */
+  background: #fff6f6;
+}
+.criterio-anulada {
+  border-left: 6px solid #2980b9;   /* Azul */
+  background: #f1f7fd;
+}
+
+/* Tabela dos critérios */
+.tabela-criterios th,
+.tabela-criterios td {
+  text-align: left;
+}
+
+/* Login page */
+.login-container {
+  max-width: 360px;
+  margin: 80px auto;
+  padding: 2.5rem 2rem 1.5rem 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(10,49,80,0.09);
+  text-align: center;
+}
+.login-logo {
+  margin-bottom: 16px;
+}
+.login-logo img {
+  height: 54px;
+}
+.login-container h2 {
+  margin-bottom: 22px;
+  color: #0A3150;
+  font-weight: 600;
+}
+.login-container label {
+  display: block;
+  text-align: left;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.login-container input[type="email"],
+.login-container input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 16px;
+  border: 1px solid #d6dee7;
+  border-radius: 7px;
+  font-size: 1rem;
+  background: #fafdff;
+}
+.login-container button {
+  width: 100%;
+  padding: 10px 0;
+  font-size: 1.12rem;
+  margin-top: 6px;
+}
+.login-container .login-erro {
+  color: #e74c3c;
+  margin-bottom: 10px;
+  min-height: 20px;
+  font-size: 0.98rem;
+}
+
+@media (max-width: 600px) {
+  .login-container { margin: 20px 5px; }
+}
+
 /* Responsividade */
 @media (max-width: 900px) {
   .container { padding: 1rem 0.5rem; }
@@ -188,22 +291,7 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
   .site-nav ul { flex-direction: column; gap: 10px; }
   th, td { font-size: 0.95rem; padding: 8px 4px; }
   .logo img { height: 32px; }
-}
-
-/* Recomendações finais */
-.recomendacoes {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: #f5f7fa;
-  border-radius: 10px;
-  font-size: 1.05rem;
-  color: #0A3150;
-}
-
-/* Tabela dos critérios */
-.tabela-criterios th,
-.tabela-criterios td {
-  text-align: left;
+  .criterio-card { flex-direction: column; gap: 0.5rem; }
 }
 
 /* Outros ajustes */
