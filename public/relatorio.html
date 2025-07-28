@@ -25,11 +25,17 @@
           <div id="resumo-calculo"></div>
           <canvas id="grafico-aprendizado" width="300" height="150"></canvas>
         </div>
+        <button id="btnPrintRelatorio" class="btn btn-print" type="button">Imprimir Relatório</button>
       </div>
       <div class="info-sdr">
         <strong>SDR:</strong> <span id="sdr"></span> &nbsp; | &nbsp; 
         <strong>Data de Criação:</strong> <span id="createdAt"></span>
       </div>
+    </section>
+
+    <section id="totais-ligacoes-relatorio">
+      <h3>Totais ligações qualificadas</h3>
+      <div id="tabela-ligacoes-relatorio"></div>
     </section>
 
     <section id="criterios-relatorio">
@@ -40,6 +46,21 @@
         <div id="nota"></div>
       </div>
     </section>
+    <div class="bloco-assinatura-print">
+      <div class="linha-assinatura">
+        <div class="assinatura-sdr">
+          <span class="linha"></span>
+          <div class="nome-assinatura"><span id="sdr-assinatura"></span></div>
+        </div>
+        <div class="assinatura-gestor">
+          <span class="linha"></span>
+          <div class="nome-assinatura">Gestão comercial</div>
+        </div>
+      </div>
+      <div class="data-emissao">
+        Documento impresso em: <span id="data-emissao"></span>
+      </div>
+    </div>
   </main>
 
   <!-- Scripts Firebase + projeto -->
@@ -51,5 +72,10 @@
   <script src="js/auth.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/relatorio.js"></script>
+  <script>
+      document.getElementById("btnPrintRelatorio").addEventListener("click", function() {
+      window.print();
+    });
+  </script>
 </body>
 </html>

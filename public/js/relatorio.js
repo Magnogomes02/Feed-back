@@ -49,6 +49,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  function renderizaTabelaLigacoes(ligacoesArray) {
+    if (!Array.isArray(ligacoesArray) || !ligacoesArray.length) return "<p>Sem informações de ligações qualificadas.</p>";
+    let html = `<table class="tabela-ligacoes">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Porcentagem (%)</th>
+          <th>Total de Chamadas</th>
+          <th>Tempo Total Bilhetado</th>
+          <th>Valor Total Bilhetado</th>
+        </tr>
+      </thead>
+      <tbody>`;
+    ligacoesArray.forEach(item => {
+      html += `<tr>
+        <td>${item.tipo === "Total" ? "<b>Total</b>" : item.tipo}</td>
+        <td>${item.porcentagem !== undefined ? item.porcentagem : ""}</td>
+        <td>${item.totalChamadas !== undefined ? item.totalChamadas : ""}</td>
+        <td>${item.tempoTotal !== undefined ? item.tempoTotal : ""}</td>
+        <td>${item.valorTotal !== undefined ? item.valorTotal : ""}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    return html;
+  }
+
+  document.getElementById("tabela-ligacoes-relatorio").innerHTML = renderizaTabelaLigacoes(relatorio.ligacoesQualificadas);
+
   // Exibe campos principais
   document.getElementById("periodo").textContent = relatorio.periodo || "-";
   document.getElementById("campanha").textContent = relatorio.campanha || "-";
@@ -59,6 +87,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("sdr").textContent = relatorio.sdr || "-";
   document.getElementById("createdAt").textContent = formatarData(relatorio.createdAt);
   document.getElementById("nota").textContent = relatorio.nota || "-";
+
+  // Preenche o campo de assinatura com o mesmo SDR
+  document.getElementById('sdr-assinatura').textContent = document.getElementById('sdr').textContent;
+
+  // Data de impressão dinâmica
+  function preencheDataEmissao() {
+    const now = new Date();
+    const dia = String(now.getDate()).padStart(2, '0');
+    const mes = String(now.getMonth() + 1).padStart(2, '0');
+    const ano = now.getFullYear();
+    const hora = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('data-emissao').textContent = `${dia}/${mes}/${ano}, ${hora}:${min}`;
+  }
+  preencheDataEmissao();
 
   // Exibe resumo nota & distribuição
   const rc = relatorio.resumoCriterios || {};

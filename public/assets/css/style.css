@@ -8,7 +8,7 @@ body, input, select, textarea, button {
 }
 
 .container {
-  max-width: max-content;
+  max-width: 1300px;
   margin: 40px auto 0 auto;
   background: #fff;
   border-radius: 14px;
@@ -27,7 +27,7 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #12105e;
+  background: linear-gradient(90deg, #0a54a0, #157afe 90%);
   padding: 16px 32px;
   border-bottom: 2px solid #e6ecf2;
   box-shadow: 0 2px 8px rgba(10,49,80,0.03);
@@ -118,8 +118,15 @@ th {
   color: #e74c3c;
 }
 
+.nota-azul {
+  color: #157afe !important;
+}
+.nota-vermelha {
+  color: #e74c3c !important;
+}
+
 /* Botões */
-.btn, .btn-ver {
+.btn, .btn-ver, .btn-editar, .btn-buscar {
   background: linear-gradient(90deg, #157afe, #0a54a0 90%);
   color: #fff;
   border: none;
@@ -133,14 +140,13 @@ th {
   box-shadow: 0 2px 8px rgba(10,49,80,0.07);
 }
 
-.btn:hover, .btn-ver:hover {
+.btn:hover, .btn-ver:hover, .btn-editar:hover, .btn-buscar:hover {
   background: linear-gradient(90deg, #0A3150, #157afe 90%);
   box-shadow: 0 4px 20px rgba(10,49,80,0.13);
 }
 
 /* Inputs e selects */
 input[type="text"], input[type="datetime-local"], select, textarea {
-  width: 100%;
   padding: 10px;
   margin: 6px 0 14px 0;
   border: 1px solid #d6dee7;
@@ -156,6 +162,62 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
 }
 
 /* Painel superior relatórios */
+
+.filtro-relatorio {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+  align-items: baseline;
+}
+
+.filtro-relatorio input,
+.filtro-relatorio select {
+  padding: 9px 14px;
+  border: 1.2px solid #c7d0e1;
+  border-radius: 7px;
+  font-size: 1rem;
+  background: #f8fafd;
+  color: #0a3150;
+  min-width: 150px;
+  outline: none;
+  transition: border .18s;
+}
+
+.filtro-relatorio input:focus,
+.filtro-relatorio select:focus {
+  border-color: #157afe;
+}
+
+.filtro-relatorio .btn-outline {
+  background: #fff;
+  color: #157afe;
+  border: 1.2px solid #157afe;
+  margin-left: -0.5rem;
+}
+
+.filtro-relatorio .btn:hover,
+.filtro-relatorio .btn-outline:hover {
+  filter: brightness(1.11);
+}
+
+.tabela-relatorios td:last-child {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  border: none;
+}
+
+.cabecalho-tabela th, .cabecalho-tabela td {
+  background: #f4f6fa;
+  color: #17294d;
+  font-weight: 600;
+  font-size: 1.07rem;
+  padding: 11px 8px;
+  text-align: center;
+}
+
 .relatorio-superior {
   display: flex;
   gap: 32px;
@@ -167,14 +229,15 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
 
 .info-bloco {
   flex: 1 1 260px;
-  min-width: 260px;
+  min-width: 240px;
+  font-size: 1rem;
 }
 
 .nota-bloco {
   flex: 1 1 200px;
   min-width: 200px;
   max-width: 310px;
-  text-align: center;
+  text-align: left;
 }
 
 /* Recomendações finais */
@@ -197,7 +260,12 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
   align-items: flex-start;
   gap: 1.2rem;
   border-left: 6px solid #f5f7fa; /* padrão neutro, sobrescrito pelas classes específicas abaixo */
-  background: #fff;
+  background: #f5f7fa;
+}
+
+input[readonly] {
+  background: #f3f3f7;
+  color: #7d889a;
 }
 
 /* Borda de cor conforme avaliação */
@@ -218,10 +286,97 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
   background: #f1f7fd;
 }
 
-/* Tabela dos critérios */
-.tabela-criterios th,
+/* Tabela das ligações */
+.tabela-ligacoes {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 22px;
+  background: #f5f7fa;
+}
+.tabela-ligacoes th, .tabela-ligacoes td {
+  border-bottom: 1px solid #fff;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 1rem;
+}
+.tabela-ligacoes th {
+  background: #f5f7fa;
+  color: #0A3150;
+  font-weight: 600;
+}
+.tabela-ligacoes input[type="text"],
+.tabela-ligacoes input[type="number"] {
+  width: 100%;
+  padding: 6px 4px;
+  box-sizing: border-box;
+  border-radius: 7px;
+  border: 1px solid #d6dee7;
+  font-size: 1rem;
+  background: #fafdff;
+  color: #0A3150;
+}
+.tabela-ligacoes input[readonly] {
+  background: #f5f7fa;
+}
+.btn-add-ligacao {
+  margin-bottom: 22px;
+}
+.btn-remove-ligacao {
+  background: #e74c3c;
+  color: #fff;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+.btn-remove-ligacao:hover {
+  background: #c0392b;
+}
+
+/* Tabela dos critérios títulos */
+.tabela-criterios th{
+  border: none;
+  border-bottom: 1px solid #e6ecf2;
+  padding: 18px 14px 18px 16px;
+  vertical-align: middle;
+  background: #f5f7fa;
+  color: #0A3150;
+  font-weight: 700;
+  font-size: 1.07rem;
+  text-align: center;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* Tabela dos critérios avaliações*/
 .tabela-criterios td {
-  text-align: left;
+  border: none;
+  border-bottom: 1px solid #e6ecf2;
+  padding: 18px 14px 18px 16px;
+  vertical-align: middle;
+  background: #f5f7fa;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.tabela-criterios select, .tabela-criterios textarea {
+  width: 100%;
+  min-width: 120px;
+  border-radius: 7px;
+  border: 1px solid #d6dee7;
+  background: #fafdff;
+  font-size: 1rem;
+  color: #0A3150;
+  padding: 8px 10px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.tabela-criterios textarea {
+  resize: vertical;
+  min-height: 36px;
+  max-height: 100px;
 }
 
 /* Login page */
@@ -274,6 +429,108 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
   font-size: 0.98rem;
 }
 
+.cubbotech-navbar {
+  width: 100%;
+  background: linear-gradient(90deg, #157afe 70%, #0a54a0 100%);
+  box-shadow: 0 2px 14px rgba(10,49,80,0.10);
+  position: relative;
+  z-index: 2;
+}
+.navbar-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+}
+.navbar-logo img {
+  height: 43px;
+}
+.navbar-links {
+  display: flex;
+  gap: 24px;
+}
+.navbar-links a {
+  color: #fff;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 8px 15px;
+  border-radius: 7px;
+  font-size: 1.07rem;
+  transition: background 0.16s;
+}
+.navbar-links a:hover, .navbar-links a.active {
+  background: #0a54a0;
+}
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.navbar-user {
+  color: #fff;
+  font-size: 1.02rem;
+  font-weight: 500;
+  margin-right: 8px;
+  letter-spacing: 0.01em;
+}
+.navbar-btn {
+  background: #fff;
+  color: #157afe;
+  font-weight: 600;
+  border: 1.2px solid #fff;
+  border-radius: 7px;
+  padding: 6px 15px;
+  cursor: pointer;
+  transition: background .16s, color .16s;
+}
+.navbar-btn:hover {
+  background: #157afe;
+  color: #fff;
+  border-color: #fff;
+}
+.navbar-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  margin-left: 14px;
+}
+.navbar-toggle span {
+  display: block;
+  height: 3px;
+  width: 27px;
+  background: #fff;
+  border-radius: 2px;
+}
+@media (max-width: 800px) {
+  .navbar-container { padding: 0 8px; }
+  .navbar-links { gap: 12px; }
+}
+@media (max-width: 700px) {
+  .navbar-container { height: 50px; }
+  .navbar-links {
+    position: absolute;
+    top: 62px;
+    left: 0;
+    width: 100vw;
+    background: #157afe;
+    flex-direction: column;
+    gap: 1px;
+    z-index: 10;
+    display: none;
+    padding: 0 0 12px 0;
+  }
+  .navbar-links.active { display: flex; }
+  .navbar-links a { padding: 15px 20px; }
+  .navbar-toggle { display: flex; }
+}
+
 @media (max-width: 600px) {
   .login-container { margin: 20px 5px; }
 }
@@ -298,4 +555,306 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
 input[type="text"]::placeholder, textarea::placeholder {
   color: #98a5b7;
   opacity: 1;
+}
+
+/* --- Blocos do formulário CubboTech --- */
+
+.form-bloco01,
+.form-bloco02 {
+  background: #f5f7fa;
+  border: 1.5px solid #e6ecf2;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  padding: 22px 18px 14px 18px;
+  box-sizing: border-box;
+}
+
+/* Bloco 01: grid para os campos principais */
+.form-bloco01 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+}
+
+.form-bloco01 label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  font-size: 1rem;
+  gap: 2px;
+  color: #0a3150;
+}
+
+/* Responsivo: 1 coluna no mobile */
+@media (max-width: 700px) {
+  .form-bloco01 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 14px 5px 8px 5px;
+  }
+}
+
+/* Títulos dos blocos internos */
+.form-bloco02 > h3 {
+  color: #0a3150;
+  font-size: 1.13rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 18px;
+  border-bottom: 1.5px solid #e6ecf2;
+  padding-bottom: 8px;
+  letter-spacing: 0.01em;
+}
+
+/* Bloco de totais ligações qualificadas: botão alinhado à esquerda */
+.form-bloco02 .btn-add-ligacao {
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
+
+/* Bloco de critérios: só espaçamento extra se quiser */
+.form-bloco03 {
+  background: #f5f7fa;
+  border: 1.5px solid #e6ecf2;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  padding: 16px 18px 20px 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.form-bloco04 {
+  background: #f5f7fa;
+  border: 1.5px solid #e6ecf2;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  padding: 16px 18px 20px 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.form-bloco04 label {
+  color: #0a3150;
+  font-size: 1.07rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.form-bloco04 textarea {
+  width: 100%;
+  min-height: 110px;
+  border-radius: 7px;
+  border: 1px solid #d6dee7;
+  background: #fafdff;
+  font-size: 1rem;
+  color: #0A3150;
+  padding: 10px 12px;
+  margin: 0;
+  box-sizing: border-box;
+  resize: vertical;
+}
+/* Botão centralizado e tamanho padrão */
+.btn-gerar-relatorio {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.btn-gerar-relatorio .btn {
+  min-width: 200px;
+  max-width: 280px;
+  width: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* Tabela de totais modernas — Relatório */
+#totais-ligacoes-relatorio {
+  background: #fafdff;
+  border-radius: 14px;
+  border: 1.5px solid #e6ecf2;
+  box-shadow: 0 4px 16px rgba(10,49,80,0.05);
+  padding: 18px 16px 12px 16px;
+  margin-bottom: 22px;
+  margin-top: 18px;
+}
+
+#totais-ligacoes-relatorio h3 {
+  color: #11499f;
+  font-size: 1.09rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 14px;
+  letter-spacing: 0.01em;
+  border-bottom: 1.5px solid #e6ecf2;
+  padding-bottom: 7px;
+}
+
+#totais-ligacoes-relatorio .tabela-ligacoes {
+  width: 100%;
+  background: transparent;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0;
+  font-size: 1rem;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+#totais-ligacoes-relatorio .tabela-ligacoes th,
+#totais-ligacoes-relatorio .tabela-ligacoes td {
+  text-align: center;
+  padding: 14px 7px;
+  font-size: 1.01rem;
+  border-bottom: 1px solid #e6ecf2;
+  background: #fff;
+}
+
+#totais-ligacoes-relatorio .tabela-ligacoes th {
+  font-weight: 700;
+  color: #0A3150;
+  font-size: 1.06rem;
+  background: #f4f8fa;
+  border-top: none;
+}
+
+#totais-ligacoes-relatorio .tabela-ligacoes tr:last-child td {
+  border-bottom: none;
+}
+
+#totais-ligacoes-relatorio .tabela-ligacoes td {
+  font-weight: 500;
+}
+
+@media (max-width: 700px) {
+  #totais-ligacoes-relatorio {
+    padding: 10px 3px 6px 3px;
+    border-radius: 8px;
+  }
+  #totais-ligacoes-relatorio .tabela-ligacoes th,
+  #totais-ligacoes-relatorio .tabela-ligacoes td {
+    font-size: 0.96rem;
+    padding: 8px 2px;
+  }
+}
+
+@media print {
+  /* Remove tudo que não for relatório */
+    nav.menu, .btn-print, #btnPrintRelatorio, .navbar, .navbar-container, .navbar-actions {
+    display: none !important;
+  }
+  h1 {
+    text-align: center !important;
+    margin-top: 10px !important;
+    margin-bottom: 18px !important;
+  }
+  .info-sdr {
+    text-align: center !important;
+    margin: 10px 0 18px 0 !important;
+    font-size: 1.03rem !important;
+    font-weight: 500 !important;
+  }
+  .container {
+    width: 19cm !important;
+    max-width: 19cm !important;
+    padding: 0.6cm 1cm 0.3cm 1cm !important;
+    margin: 0 auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+  .relatorio-superior {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 18px !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+  .info-bloco, .nota-bloco {
+    min-width: 200px !important;
+    max-width: 350px !important;
+    flex: 1 1 0 !important;
+    font-size: 0.98rem !important;
+    box-sizing: border-box !important;
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+  .nota-bloco {
+    text-align: left !important;
+    margin-left: 10px !important;
+  }
+  #btnPrintRelatorio {
+    display: none !important;
+  }
+  #totais-ligacoes-relatorio {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 10px 3px !important;
+    margin: 8px 0 18px 0 !important;
+  }
+  a[href]:after { content: ""; }
+  h1, h2, h3 { page-break-after: avoid; }
+  table, th, td {
+    page-break-inside: avoid;
+  }
+}
+
+.bloco-assinatura-print {
+  display: none;
+}
+
+@media print {
+  .bloco-assinatura-print {
+    display: block !important;
+    margin-top: 48px !important;
+    margin-bottom: 10px !important;
+    font-size: 1.04rem;
+    color: #0a3150;
+    page-break-inside: avoid;
+  }
+  .linha-assinatura {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 38px;
+    gap: 48px;
+  }
+  .assinatura-sdr, .assinatura-gestor {
+    flex: 1 1 220px;
+    text-align: center;
+    font-size: 1.01rem;
+  }
+  .linha {
+    display: block;
+    border-bottom: 1.3px solid #234ba6;
+    margin-bottom: 7px;
+    margin-top: 35px;
+    width: 100%;
+    height: 1px;
+    min-width: 180px;
+    max-width: 260px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .nome-assinatura {
+    margin-top: 0;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .data-emissao {
+    margin-top: 10px;
+    text-align: right;
+    font-size: 0.97rem;
+    color: #123c8c;
+    font-style: italic;
+  }
 }

@@ -1,54 +1,64 @@
-// js/menu.js
-
 document.addEventListener("DOMContentLoaded", () => {
-  // Menu HTML padronizado CubboTech
+  // INJETA O HTML DO MENU!
   const htmlMenu = `
-    <header class="site-header">
-      <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-      </button>
-      <div class="logo">
-        <img src="assets/images/Imagotipo CubboTech Colorida.png" alt="CubboTech">
-      </div>
-      <div class="user-session">
-        <span id="usuario-logado"></span>
-        <button id="logoutBtn" style="display:none">Sair</button>
-      </div>
-    </header>
-    <nav class="site-nav" style="display:none;">
-      <ul>
-        <li><a href="index.html">🏠 Início</a></li>
-        <li><a href="formulario.html">📝 Formulário</a></li>
-        <li><a href="relatorio.html">📋 Relatório</a></li>
-      </ul>
+<header class="cubbotech-navbar">
+  <div class="navbar-container">
+    <a href="index.html" class="navbar-logo">
+      <img src="assets/images/Imagotipo CubboTech Branca.png" alt="CubboTech" />
+    </a>
+    <nav class="navbar-links" id="navbarLinks">
+      <a href="index.html">Início</a>
+      <a href="formulario.html">Formulário</a>
     </nav>
+    <div class="navbar-actions">
+      <span id="usuario-logado" class="navbar-user"></span>
+      <button id="logoutBtn" class="navbar-btn" style="display:none;">Sair</button>
+      <button class="navbar-toggle" id="navbarToggle" aria-label="Abrir menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
   `;
 
-  // Injeta o menu na <nav class="menu">
+  // Injeta dentro do elemento nav.menu (assim o menu aparece!)
   const navEl = document.querySelector("nav.menu");
   if (navEl) navEl.innerHTML = htmlMenu;
 
-  // Menu responsivo: abre/fecha nav no mobile
-  document.querySelectorAll('.menu-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const nav = document.querySelector('.site-nav');
-      if (nav) {
-        const aberto = nav.style.display === "block";
-        nav.style.display = aberto ? "none" : "block";
-        btn.setAttribute('aria-expanded', !aberto);
-      }
+  // ...restante do seu JS (eventos do hamburguer, etc)...
+  const toggle = document.getElementById('navbarToggle');
+  const links = document.getElementById('navbarLinks');
+  if(toggle && links){
+    toggle.addEventListener('click', () => {
+      links.classList.toggle('active');
     });
+    // Fecha o menu ao clicar em um link (no mobile)
+    links.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        if(window.innerWidth < 701) links.classList.remove('active');
+      });
+    });
+  }
+
+  firebase.auth().onAuthStateChanged(function(user) {
+    const userSpan = document.getElementById('usuario-logado');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (user) {
+      // Exibe email (ou displayName se quiser mais estiloso)
+      userSpan.textContent = user.displayName ? user.displayName : user.email;
+      logoutBtn.style.display = "inline-block";
+    } else {
+      userSpan.textContent = "";
+      logoutBtn.style.display = "none";
+    }
   });
 
-  // Fecha nav ao clicar em link no mobile
-  document.querySelectorAll('.site-nav a').forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth < 800) {
-        const nav = document.querySelector('.site-nav');
-        if (nav) nav.style.display = "none";
-      }
-    });
+  // Logout funcional
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'logoutBtn') {
+      firebase.auth().signOut().then(function() {
+        window.location.href = "login.html"; // ou sua tela inicial/login
+      });
+    }
   });
 });

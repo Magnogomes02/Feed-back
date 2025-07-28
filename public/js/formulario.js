@@ -1,11 +1,132 @@
-// js/formulario.js
-
 document.addEventListener("DOMContentLoaded", () => {
   const db = firebase.firestore();
   const form = document.getElementById("feedbackForm");
   const tbody = document.getElementById("criterios");
+  const tbodyLigacoes = document.getElementById("tbody-ligacoes");
+  const btnAddTipo = document.getElementById("addTipoLigacao");
+  const urlParams = new URLSearchParams(window.location.search);
 
-  // Ordem e nomes dos critérios (ajuste aqui se quiser trocar!)
+  // Tipos iniciais (pode customizar)
+  let ligacoesArray = [
+    { tipo: "Fixo", porcentagem: "", totalChamadas: "", tempoTotal: "", valorTotal: "" },
+    { tipo: "Móvel", porcentagem: "", totalChamadas: "", tempoTotal: "", valorTotal: "" }
+  ];
+
+  function renderizaLigacoes() {
+    // Remove linhas atuais
+    tbodyLigacoes.innerHTML = "";
+    // Cria linha para cada item do array
+    ligacoesArray.forEach((item, idx) => {
+      const isTotal = item.tipo === "Total";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>
+          ${isTotal ? "<b>Total</b>" : `<input type="text" class="input-tipo" data-idx="${idx}" value="${item.tipo}">`}
+        </td>
+        <td><input type="number" min="0" max="100" class="input-porcentagem" data-idx="${idx}" value="${item.porcentagem}" ${isTotal ? "readonly" : ""}></td>
+        <td><input type="number" min="0" class="input-chamadas" data-idx="${idx}" value="${item.totalChamadas}" ${isTotal ? "readonly" : ""}></td>
+        <td><input type="text" class="input-tempo" data-idx="${idx}" value="${item.tempoTotal}" ${isTotal ? "readonly" : ""}></td>
+        <td><input type="text" class="input-valor" data-idx="${idx}" value="${item.valorTotal}" ${isTotal ? "readonly" : ""}></td>
+        <td>
+          ${!isTotal && ligacoesArray.length > 2 ? `<button type="button" class="btn-remove-ligacao" data-idx="${idx}">Remover</button>` : ""}
+        </td>
+      `;
+      tbodyLigacoes.appendChild(tr);
+    });
+  }
+
+  function atualizarTotalLigacoes() {
+    // Remove "Total" se já existir
+    ligacoesArray = ligacoesArray.filter(item => item.tipo !== "Total");
+    let somaPorcentagem = 0, somaChamadas = 0;
+    let tempos = [], valores = [];
+    ligacoesArray.forEach(item => {
+      somaPorcentagem += parseFloat(item.porcentagem) || 0;
+      somaChamadas += parseInt(item.totalChamadas) || 0;
+      tempos.push(item.tempoTotal || "0");
+      valores.push(item.valorTotal || "R$ 0");
+    });
+    // Funções de soma
+    function somarTemposArr(arr) {
+      let min = 0;
+      arr.forEach(t => { min += parseInt(t) || 0; });
+      return `${min} min`;
+    }
+    function somarValoresArr(arr) {
+      let tot = 0;
+      arr.forEach(v => {
+        let n = parseFloat((v || "0").replace(/[^\d,]/g, '').replace(',', '.'));
+        tot += n || 0;
+      });
+      return `R$ ${tot.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+    }
+    ligacoesArray.push({
+      tipo: "Total",
+      porcentagem: somaPorcentagem,
+      totalChamadas: somaChamadas,
+      tempoTotal: somarTemposArr(tempos),
+      valorTotal: somarValoresArr(valores)
+    });
+  }
+
+  function syncLigacoesInputsToArray() {
+    document.querySelectorAll('.input-tipo').forEach(input => {
+      const idx = +input.dataset.idx;
+      ligacoesArray[idx].tipo = input.value;
+    });
+    document.querySelectorAll('.input-porcentagem').forEach(input => {
+      const idx = +input.dataset.idx;
+      ligacoesArray[idx].porcentagem = input.value;
+    });
+    document.querySelectorAll('.input-chamadas').forEach(input => {
+      const idx = +input.dataset.idx;
+      ligacoesArray[idx].totalChamadas = input.value;
+    });
+    document.querySelectorAll('.input-tempo').forEach(input => {
+      const idx = +input.dataset.idx;
+      ligacoesArray[idx].tempoTotal = input.value;
+    });
+    document.querySelectorAll('.input-valor').forEach(input => {
+      const idx = +input.dataset.idx;
+      ligacoesArray[idx].valorTotal = input.value;
+    });
+    atualizarTotalLigacoes();
+    renderizaLigacoes();
+  }
+
+  // Eventos de blur
+  tbodyLigacoes.addEventListener('blur', function(e) {
+    if (
+      e.target.classList.contains('input-tipo') ||
+      e.target.classList.contains('input-porcentagem') ||
+      e.target.classList.contains('input-chamadas') ||
+      e.target.classList.contains('input-tempo') ||
+      e.target.classList.contains('input-valor')
+    ) {
+      syncLigacoesInputsToArray();
+    }
+  }, true);
+
+  // Adicionar novo tipo
+  btnAddTipo.addEventListener('click', () => {
+    ligacoesArray.splice(ligacoesArray.length-1, 0, { tipo:"Novo", porcentagem:"", totalChamadas:"", tempoTotal:"", valorTotal:"" });
+    renderizaLigacoes();
+  });
+
+  // Remover tipo
+  tbodyLigacoes.addEventListener('click', function(e) {
+    if (e.target.classList.contains('btn-remove-ligacao')) {
+      const idx = +e.target.dataset.idx;
+      ligacoesArray.splice(idx, 1);
+      renderizaLigacoes();
+    }
+  });
+
+  // Inicializa blocos na primeira carga
+  atualizarTotalLigacoes();
+  renderizaLigacoes();
+
+  // Ordem e nomes dos critérios (ajuste aqui se quiser trocar a ordem)
   const criteriosNomes = [
     "Identificação de perfil (PIT)",
     "Abertura e Rapport",
@@ -69,9 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
       "❎ Anulada": 0
     };
     criterios.forEach(c => contagem[c.avaliacao]++);
-    const total = criterios.length;
-    const notaFinal = total > 0
-      ? ((contagem["✔️ OK"] * 1 + contagem["⚠️ Parcial"] * 0.6) / total * 10)
+    const totalValidos = criterios.filter(c => c.avaliacao !== "❎ Anulada").length;
+    const notaFinal = totalValidos > 0
+      ? ((contagem["✔️ OK"] * 1 + contagem["⚠️ Parcial"] * 0.6) / totalValidos * 10)
       : 0;
 
     const resumoCriterios = {
@@ -86,6 +207,8 @@ document.addEventListener("DOMContentLoaded", () => {
       total
     };
 
+    const ligacoesQualificadas = ligacoesArray.slice();
+
     // Monta dados do formulário
     const dados = {
       sdr: form.sdr.value,
@@ -95,6 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
       numero: form.numero.value,
       datalig: form.datalig.value,
       qualif: form.qualif.value,
+      ligacoesQualificadas,
       criterios,
       nota: form.nota.value,
       notaFinal,
@@ -102,10 +226,16 @@ document.addEventListener("DOMContentLoaded", () => {
       createdAt: new Date().toISOString()
     };
 
-    // Salva no Firestore
     try {
-      const doc = await db.collection("avaliacoes").doc(dados.protocolo).set(dados);
-      // Redireciona para o relatório criado
+      if (editId) {
+        // Atualiza (merge para não apagar outros campos)
+        await db.collection("avaliacoes").doc(editId).set(dados, { merge: true });
+        alert("Edição salva com sucesso!");
+      } else {
+        // Criação nova (usa o protocolo como ID)
+        await db.collection("avaliacoes").doc(dados.protocolo).set(dados);
+        alert("Cadastro realizado com sucesso!");
+      }
       window.location.href = `relatorio.html?id=${dados.protocolo}`;
     } catch (err) {
       alert("Erro ao salvar no Firebase: " + (err.message || err));
@@ -113,4 +243,48 @@ document.addEventListener("DOMContentLoaded", () => {
       form.querySelector("button[type=submit]").disabled = false;
     }
   });
+
+  const editId = urlParams.get("edit");
+    if (editId) {
+      form.protocolo.readOnly = true;
+      db.collection("avaliacoes").doc(editId).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+
+        // Preenche campos simples
+        form.sdr.value = data.sdr || "";
+        form.periodo.value = data.periodo || "";
+        form.campanha.value = data.campanha || "";
+        form.protocolo.value = data.protocolo || "";
+        form.numero.value = data.numero || "";
+        form.datalig.value = data.datalig ? data.datalig.slice(0,16) : "";
+        form.qualif.value = data.qualif || "";
+        form.nota.value = data.nota || "";
+
+        // Preenche totais ligações qualificadas
+        if (Array.isArray(data.ligacoesQualificadas)) {
+          ligacoesArray = data.ligacoesQualificadas.map(l => ({...l})); // faz cópia para evitar referência
+          atualizarTotalLigacoes();
+          renderizaLigacoes();
+        }
+
+        // Preenche critérios
+        if (Array.isArray(data.criterios)) {
+          renderizaCriterios();
+          data.criterios.forEach((c, idx) => {
+            const sel = form[`criterio-avaliacao-${idx}`];
+            const txt = form[`criterio-observacao-${idx}`];
+            if (sel) sel.value = c.avaliacao || "";
+            if (txt) txt.value = c.observacao || "";
+          });
+        }
+
+        // Troca texto do botão
+        form.querySelector("button[type=submit]").textContent = "Salvar Edição";
+        } else {
+        alert("Protocolo não encontrado!");
+        window.location.href = "index.html";
+      }
+    });
+  }
 });

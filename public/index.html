@@ -10,17 +10,26 @@
   <nav class="menu"></nav>
   
   <main class="container">
-    <h1>Relatórios Encontrados</h1>
+    <div class="container-cabecalho">
+      <h1>Painel de Relatórios</h1>
+    </div>
     <section>
-      <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.2rem;">
-        <input type="text" id="busca" placeholder="Buscar por SDR, protocolo ou período..." style="flex: 1 1 240px; max-width: 350px;">
-        <button id="btnBuscar" class="btn">Buscar</button>
+      <div class="filtro-relatorio">
+        <input type="text" id="busca" placeholder="Buscar por SDR, protocolo ou período..." maxlength="40" autocomplete="off">
+        <select id="filtro-sdr">
+          <option value="">Todos SDRs</option>
+        </select>
+        <select id="filtro-periodo">
+          <option value="">Todos Períodos</option>
+        </select>
+        <button id="btnBuscar" class="btn-buscar">Buscar</button>
+        <button id="btnLimparFiltro" class="btn btn-outline">Limpar</button>
       </div>
-      <div style="overflow-x:auto;">
+      <div>
         <table class="tabela-relatorios">
-          <thead>
+          <thead class="cabecalho-tabela">
             <tr>
-              <th>SDR</th>
+              <th>Nome</th>
               <th>Período apurado</th>
               <th>Data da ligação</th>
               <th>Protocolo</th>
