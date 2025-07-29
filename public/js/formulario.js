@@ -1,3 +1,5 @@
+// js/formulario.js
+
 document.addEventListener("DOMContentLoaded", () => {
   const db = firebase.firestore();
   const form = document.getElementById("feedbackForm");
@@ -5,17 +7,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const tbodyLigacoes = document.getElementById("tbody-ligacoes");
   const btnAddTipo = document.getElementById("addTipoLigacao");
   const urlParams = new URLSearchParams(window.location.search);
+  const editId = urlParams.get("edit");
 
-  // Tipos iniciais (pode customizar)
+  // Bloco de ligações (array controlado)
   let ligacoesArray = [
     { tipo: "Fixo", porcentagem: "", totalChamadas: "", tempoTotal: "", valorTotal: "" },
     { tipo: "Móvel", porcentagem: "", totalChamadas: "", tempoTotal: "", valorTotal: "" }
   ];
 
+  // Critérios padrão do SDR
+  const criteriosNomes = [
+    "Identificação de perfil (PIT)",
+    "Abertura e Rapport",
+    "Apresentação de valor",
+    "Convocação do analista fiscal",
+    "Gestão de objeções",
+    "Próximo passo definido",
+    "Tom e linguagem",
+    "Abordagem de Vendas",
+    "Técnica no agendamento",
+    "Efetividade",
+    "Cordialidade e Relacionamento",
+    "Prova social",
+    "Qualificação de Leads",
+    "Tempo de Resposta"
+  ];
+
+  // Renderiza tabela de ligações
   function renderizaLigacoes() {
-    // Remove linhas atuais
     tbodyLigacoes.innerHTML = "";
-    // Cria linha para cada item do array
     ligacoesArray.forEach((item, idx) => {
       const isTotal = item.tipo === "Total";
       const tr = document.createElement("tr");
@@ -36,7 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function atualizarTotalLigacoes() {
-    // Remove "Total" se já existir
     ligacoesArray = ligacoesArray.filter(item => item.tipo !== "Total");
     let somaPorcentagem = 0, somaChamadas = 0;
     let tempos = [], valores = [];
@@ -46,7 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
       tempos.push(item.tempoTotal || "0");
       valores.push(item.valorTotal || "R$ 0");
     });
-    // Funções de soma
     function somarTemposArr(arr) {
       let min = 0;
       arr.forEach(t => { min += parseInt(t) || 0; });
@@ -107,13 +125,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, true);
 
-  // Adicionar novo tipo
+  // Adicionar novo tipo de ligação
   btnAddTipo.addEventListener('click', () => {
     ligacoesArray.splice(ligacoesArray.length-1, 0, { tipo:"Novo", porcentagem:"", totalChamadas:"", tempoTotal:"", valorTotal:"" });
     renderizaLigacoes();
   });
 
-  // Remover tipo
+  // Remover tipo de ligação
   tbodyLigacoes.addEventListener('click', function(e) {
     if (e.target.classList.contains('btn-remove-ligacao')) {
       const idx = +e.target.dataset.idx;
@@ -125,24 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Inicializa blocos na primeira carga
   atualizarTotalLigacoes();
   renderizaLigacoes();
-
-  // Ordem e nomes dos critérios (ajuste aqui se quiser trocar a ordem)
-  const criteriosNomes = [
-    "Identificação de perfil (PIT)",
-    "Abertura e Rapport",
-    "Apresentação de valor",
-    "Convocação do analista fiscal",
-    "Gestão de objeções",
-    "Próximo passo definido",
-    "Tom e linguagem",
-    "Abordagem de Vendas",
-    "Técnica no agendamento",
-    "Efetividade",
-    "Cordialidade e Relacionamento",
-    "Prova social",
-    "Qualificação de Leads",
-    "Tempo de Resposta"
-  ];
 
   // Renderiza linhas para os critérios
   function renderizaCriterios() {
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderizaCriterios();
 
-  // Ao submeter formulário
+  // Submissão do formulário
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     form.querySelector("button[type=submit]").disabled = true;
@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
       observacao: form[`criterio-observacao-${idx}`].value
     }));
 
-    // Calcula resumo de notas
+    // Calcula resumo de notas (Anulada não tem peso!)
     const contagem = {
       "✔️ OK": 0,
       "⚠️ Parcial": 0,
@@ -200,11 +200,11 @@ document.addEventListener("DOMContentLoaded", () => {
       parcial: contagem["⚠️ Parcial"],
       faltou: contagem["❌ Faltou"],
       anulada: contagem["❎ Anulada"],
-      percentOk: ((contagem["✔️ OK"] / total) * 100).toFixed(1),
-      percentParcial: ((contagem["⚠️ Parcial"] / total) * 100).toFixed(1),
-      percentFaltou: ((contagem["❌ Faltou"] / total) * 100).toFixed(1),
-      percentAnulada: ((contagem["❎ Anulada"] / total) * 100).toFixed(1),
-      total
+      percentOk: totalValidos > 0 ? ((contagem["✔️ OK"] / totalValidos) * 100).toFixed(1) : "0.0",
+      percentParcial: totalValidos > 0 ? ((contagem["⚠️ Parcial"] / totalValidos) * 100).toFixed(1) : "0.0",
+      percentFaltou: totalValidos > 0 ? ((contagem["❌ Faltou"] / totalValidos) * 100).toFixed(1) : "0.0",
+      percentAnulada: ((contagem["❎ Anulada"] / criterios.length) * 100).toFixed(1),
+      total: criterios.length
     };
 
     const ligacoesQualificadas = ligacoesArray.slice();
@@ -222,17 +222,24 @@ document.addEventListener("DOMContentLoaded", () => {
       criterios,
       nota: form.nota.value,
       notaFinal,
-      resumoCriterios,
-      createdAt: new Date().toISOString()
+      resumoCriterios
     };
 
     try {
       if (editId) {
-        // Atualiza (merge para não apagar outros campos)
-        await db.collection("avaliacoes").doc(editId).set(dados, { merge: true });
+        // Busca o documento original para manter o createdAt
+        const docRef = db.collection("avaliacoes").doc(editId);
+        const docSnap = await docRef.get();
+        let createdAt = docSnap.exists && docSnap.data().createdAt
+          ? docSnap.data().createdAt
+          : new Date().toISOString();
+        dados.createdAt = createdAt; // Preserva o createdAt SEMPRE!
+        dados.updatedAt = new Date().toISOString();
+        await docRef.set(dados, { merge: true });
         alert("Edição salva com sucesso!");
       } else {
         // Criação nova (usa o protocolo como ID)
+        dados.createdAt = new Date().toISOString();
         await db.collection("avaliacoes").doc(dados.protocolo).set(dados);
         alert("Cadastro realizado com sucesso!");
       }
@@ -244,12 +251,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  const editId = urlParams.get("edit");
-    if (editId) {
-      form.protocolo.readOnly = true;
-      db.collection("avaliacoes").doc(editId).get().then(doc => {
-        if (doc.exists) {
-          const data = doc.data();
+  // Preenchimento do formulário para edição
+  if (editId) {
+    form.protocolo.readOnly = true;
+    db.collection("avaliacoes").doc(editId).get().then(doc => {
+      if (doc.exists) {
+        const data = doc.data();
 
         // Preenche campos simples
         form.sdr.value = data.sdr || "";
@@ -263,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Preenche totais ligações qualificadas
         if (Array.isArray(data.ligacoesQualificadas)) {
-          ligacoesArray = data.ligacoesQualificadas.map(l => ({...l})); // faz cópia para evitar referência
+          ligacoesArray = data.ligacoesQualificadas.map(l => ({...l}));
           atualizarTotalLigacoes();
           renderizaLigacoes();
         }
@@ -281,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Troca texto do botão
         form.querySelector("button[type=submit]").textContent = "Salvar Edição";
-        } else {
+      } else {
         alert("Protocolo não encontrado!");
         window.location.href = "index.html";
       }

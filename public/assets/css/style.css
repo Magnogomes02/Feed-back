@@ -822,6 +822,18 @@ input[type="text"]::placeholder, textarea::placeholder {
     color: #0a3150;
     page-break-inside: avoid;
   }
+    /* Reduz fonte dos cards dos critérios */
+  .criterio-card {
+    font-size: 0.95rem !important;
+    padding: 0.7rem 1rem !important;
+    margin: 0.6rem 0 !important;
+  }
+  .criterio-card strong {
+    font-size: 0.99rem !important;
+  }
+  .criterio-card span {
+    font-size: 0.93rem !important;
+  }
   .linha-assinatura {
     display: flex;
     justify-content: space-between;
