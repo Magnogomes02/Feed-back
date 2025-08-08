@@ -10,22 +10,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     return isNaN(d) ? "-" : d.toLocaleString("pt-BR");
   }
 
+
+    
   // Critérios na ordem correta
   const criteriosNomes = [
-    "Identificação de perfil (PIT)",
-    "Abertura e Rapport",
-    "Apresentação de valor",
-    "Convocação do analista fiscal",
-    "Gestão de objeções",
-    "Próximo passo definido",
-    "Tom e linguagem",
-    "Abordagem de Vendas",
-    "Técnica no agendamento",
-    "Efetividade",
-    "Cordialidade e Relacionamento",
-    "Prova social",
-    "Qualificação de Leads",
-    "Tempo de Resposta"
+    "1 - Identificação de perfil (PIT)",
+    "2 - Abertura e Rapport",
+    "3 - Apresentação de valor",
+    "4 - Convocação do analista fiscal",
+    "5 - Gestão de objeções",
+    "6 - Próximo passo definido",
+    "7 - Tom e linguagem",
+    "8 - Abordagem de Vendas",
+    "9 - Técnica no agendamento",
+    "10 - Efetividade",
+    "11 - Cordialidade e Relacionamento",
+    "12 - Prova social",
+    "13 - Qualificação de Leads",
+    "14 - Tempo de Resposta"
   ];
 
   // Captura id pela URL
@@ -44,6 +46,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const doc = await db.collection("avaliacoes").doc(id).get();
     if (!doc.exists) throw new Error("Relatório não encontrado!");
     relatorio = doc.data();
+
+      const periodoSpan = document.getElementById("periodo");
+      periodoSpan.textContent = 
+      (relatorio.periodo_inicio && relatorio.periodo_fim)
+        ? `${relatorio.periodo_inicio.split('-').reverse().join('/')} - ${relatorio.periodo_fim.split('-').reverse().join('/')}`
+        : (relatorio.periodo || "-");
+
   } catch (err) {
     document.body.innerHTML = `<main class='container'><h2>Erro: ${err.message}</h2></main>`;
     return;
@@ -84,12 +93,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("numero").textContent = relatorio.numero || "-";
   document.getElementById("datalig").textContent = formatarData(relatorio.datalig);
   document.getElementById("qualif").textContent = relatorio.qualif || "-";
-  document.getElementById("sdr").textContent = relatorio.sdr || "-";
+  document.getElementById("agente").textContent = relatorio.agente || "-";
+  document.getElementById("sdr-assinatura").textContent = relatorio.agente || "-";
   document.getElementById("createdAt").textContent = formatarData(relatorio.createdAt);
   document.getElementById("nota").textContent = relatorio.nota || "-";
 
   // Preenche o campo de assinatura com o mesmo SDR
-  document.getElementById('sdr-assinatura').textContent = document.getElementById('sdr').textContent;
+  document.getElementById('sdr-assinatura').textContent = document.getElementById('agente').textContent;
 
   // Data de impressão dinâmica
   function preencheDataEmissao() {
@@ -126,8 +136,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }));
   }
 
+  function normalizar(nome) {
+  // Remove prefixo numérico, espaços e caixa baixa
+  return nome.replace(/^\d+\s*-\s*/, "").trim().toLowerCase();
+  }
+
   criteriosNomes.forEach(nome => {
-    const c = criterios.find(c => c.nome === nome) || { avaliacao: "-", observacao: "-" };
+  // Procura pelo nome exato ou normalizado
+  const c = criterios.find(c => c.nome === nome || normalizar(c.nome) === normalizar(nome)) || { avaliacao: "-", observacao: "-" };
 
     // Define classe de cor para a avaliação
     let classe = "criterio-card";
@@ -149,11 +165,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     lista.appendChild(div);
   });
 
-  // Gráfico curva de aprendizado: últimos 5 relatórios deste SDR
-  if (relatorio.sdr) {
+  // Gráfico curva de aprendizado: últimos 5 relatórios deste Agente SDR
+  if (relatorio.agente) {
     try {
       const query = await db.collection("avaliacoes")
-        .where("sdr", "==", relatorio.sdr)
+        .where("agente", "==", relatorio.agente)
         .orderBy("createdAt", "desc")
         .limit(5)
         .get();
@@ -175,16 +191,17 @@ document.addEventListener("DOMContentLoaded", async () => {
               label: "Nota Final",
               data: dados.map(d => d.nota),
               fill: false,
-              tension: 0.2,
+              tension: 0.3,
               borderColor: "#157afe",
-              backgroundColor: "#157afe"
+              backgroundColor: "#4b6586ff"
             }]
           },
           options: {
-            responsive: false,
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 0.1,
             plugins: {
-              legend: { display: false }
-            },
+              legend: { display: false } },
             scales: {
               y: {
                 beginAtZero: true,

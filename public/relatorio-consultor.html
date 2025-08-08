@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório de Feedback - Consultor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <nav class="menu"></nav>
+  <main class="container">
+    <h1>Relatório de Feedback - Consultor</h1><br><br>
+
+    <section class="info-superior">
+      <div style="display:flex; gap:32px; flex-wrap:wrap;">
+        <div class="info-bloco">
+          <strong>Período apurado:</strong> <span id="periodo"></span><br>
+          <strong>Data da reunião:</strong> <span id="datalig"></span><br>
+          <strong>Protocolo:</strong> <span id="protocolo"></span><br>
+          <strong>Status do negócio:</strong> <span id="status_negocio" style="color:red; font-weight:700;">PERDA</span><br>
+          <strong>Links:</strong> <a id="link_tldv" target="_blank">TL;DV</a> | <a id="link_pipe" target="_blank">PipeDrive</a>
+        </div>
+        <div class="info-bloco nota-bloco">
+          <div id="resumo-calculo"></div>
+        </div>
+        <div style="margin-top:8px;">
+          <strong>Nota Final:</strong> <span id="notaFinal" style="font-size:1.4rem;"></span> / 10
+        </div>
+        <div style="align-self:flex-start;">
+          <button id="btnPrintRelatorio" class="btn btn-print" type="button">Imprimir Relatório</button>
+        </div>
+      </div>
+      </div><br><br>
+      <div class="chart-container">
+        <canvas id="grafico-aprendizado" style="border:1px solid #e2e8f0; border-radius:8px;"></canvas>
+      </div><br><br>
+      <div class="info-sdr">
+        <strong>Agente:</strong> <span id="agente"></span> &nbsp; | &nbsp; 
+        <strong>Data de criação:</strong> <span id="createdAt"></span><br>
+      </div>
+    </section>
+
+    <section id="detalhamento">
+      <h2>Detalhamento dos Critérios</h2>
+      <div id="lista-criterios"></div>
+    </section>
+
+    <section>
+      <div class="recomendacoes">
+        <strong>Recomendações Finais:</strong>
+        <div id="recomendacoes"></div>
+      </div>
+      <div class="recomendacoes">
+        <strong>Plano de Ação:</strong>
+        <div id="plano_acao"></div>
+      </div>
+    </section><br><br>
+
+    <div class="bloco-assinatura-print">
+      <div class="data-emissao">
+        Documento impresso em: <span id="data-emissao"></span>
+      </div><br><br><br>
+      <div class="linha-assinatura">
+        <div class="assinatura-sdr">
+          <span class="linha"></span>
+          <div class="nome-assinatura"><span id="assinatura_agente"></span></div>
+        </div>
+        <div class="assinatura-gestor">
+          <span class="linha"></span>
+          <div class="nome-assinatura">Gestão comercial</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/relatorio-consultor.js"></script>
+  <script>
+    document.getElementById("btnPrintRelatorio").addEventListener("click", () => window.print());
+  </script>
+</body>
+</html>

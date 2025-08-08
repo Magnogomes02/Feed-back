@@ -15,13 +15,26 @@
     </div>
     <section>
       <div class="filtro-relatorio">
-        <input type="text" id="busca" placeholder="Buscar por SDR, protocolo ou período..." maxlength="40" autocomplete="off">
-        <select id="filtro-sdr">
-          <option value="">Todos SDRs</option>
+        <input type="text" id="busca" placeholder="Buscar por Agente, protocolo ou período..." maxlength="40" autocomplete="off">
+        <select id="filtro-agente">
+          <option value="">Agente</option>
+        </select>
+        <select id="filtro-setor">
+          <option value="">Todos os setores</option>
+          <option value="SDR">SDR</option>
+          <option value="Closer">Consultor</option>
+        </select>
+        <select id="filtro-ano">
+          <option value="">Ano</option>
+        </select>
+        <select id="filtro-mes">
+          <option value="">Mês</option>
         </select>
         <select id="filtro-periodo">
-          <option value="">Todos Períodos</option>
+          <option value="">Período apurado</option>
         </select>
+      </div>
+      <div>
         <button id="btnBuscar" class="btn-buscar">Buscar</button>
         <button id="btnLimparFiltro" class="btn btn-outline">Limpar</button>
       </div>
@@ -30,8 +43,9 @@
           <thead class="cabecalho-tabela">
             <tr>
               <th>Nome</th>
+              <th>Setor</th>
               <th>Período apurado</th>
-              <th>Data da ligação</th>
+              <th>Data do contato</th>
               <th>Protocolo</th>
               <th>Data de Criação</th>
               <th>Nota Final</th>
@@ -41,6 +55,11 @@
           <tbody id="lista-relatorios"></tbody>
         </table>
       </div>
+    <div id="paginacao-relatorios" class="paginacao-relatorios">
+      <span id="info-paginacao"></span>
+      <button id="btnAnterior" class="btn" disabled>Anterior</button>
+      <button id="btnProxima" class="btn" disabled>Próxima</button>
+    </div>
     </section>
   </main>
 

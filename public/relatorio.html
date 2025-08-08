@@ -10,7 +10,8 @@
   <nav class="menu"></nav>
   
   <main class="container">
-    <h1>Relatório de Feedback - SDR</h1>
+    <h1>Relatório de Feedback - SDR</h1><br><br>
+    
     <section id="info-relatorio">
       <div class="relatorio-superior">
         <div class="info-bloco">
@@ -23,12 +24,14 @@
         </div>
         <div class="info-bloco nota-bloco">
           <div id="resumo-calculo"></div>
-          <canvas id="grafico-aprendizado" width="300" height="150"></canvas>
         </div>
         <button id="btnPrintRelatorio" class="btn btn-print" type="button">Imprimir Relatório</button>
       </div>
+      <div class="chart-container">
+      <canvas id="grafico-aprendizado" style="border:1px solid #e2e8f0; border-radius:8px;"></canvas>
+      </div>
       <div class="info-sdr">
-        <strong>SDR:</strong> <span id="sdr"></span> &nbsp; | &nbsp; 
+        <strong>Agente:</strong> <span id="agente"></span> &nbsp; | &nbsp; 
         <strong>Data de Criação:</strong> <span id="createdAt"></span>
       </div>
     </section>
@@ -47,6 +50,9 @@
       </div>
     </section>
     <div class="bloco-assinatura-print">
+      <div class="data-emissao">
+        Documento impresso em: <span id="data-emissao"></span>
+      </div><br><br><br>
       <div class="linha-assinatura">
         <div class="assinatura-sdr">
           <span class="linha"></span>
@@ -56,9 +62,6 @@
           <span class="linha"></span>
           <div class="nome-assinatura">Gestão comercial</div>
         </div>
-      </div>
-      <div class="data-emissao">
-        Documento impresso em: <span id="data-emissao"></span>
       </div>
     </div>
   </main>

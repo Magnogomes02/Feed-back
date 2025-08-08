@@ -1,6 +1,6 @@
 /* Fonte principal */
 body, input, select, textarea, button {
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: Arial;
   color: #0A3150;
   background: #f5f7fa;
   margin: 0;
@@ -103,6 +103,7 @@ th, td {
   border-bottom: 1px solid #e6ecf2;
   padding: 12px 8px;
   text-align: left;
+  /* text-align: center; */
   font-size: 1rem;
 }
 
@@ -125,6 +126,20 @@ th {
   color: #e74c3c !important;
 }
 
+/* --- Chart.js responsive & centralizado --- */
+.chart-container {
+  position: relative;      /* obrigatório para o Chart.js */
+  width: auto;           /* ocupa 80% da largura disponível */
+  max-width: 700px;      /* nunca maior que 700px */
+  margin: 1.5rem auto;   /* centraliza horizontalmente e dá espaço acima/baixo */
+}
+
+.chart-container canvas {
+  width: auto !important;     /* força o canvas a preencher o container */
+  height: 250px !important;   /* altura fixa — ajuste para mais/menos conforme preferir */
+}
+
+
 /* Botões */
 .btn, .btn-ver, .btn-editar, .btn-buscar {
   background: linear-gradient(90deg, #157afe, #0a54a0 90%);
@@ -140,13 +155,26 @@ th {
   box-shadow: 0 2px 8px rgba(10,49,80,0.07);
 }
 
+.btn-outline {
+  background: #fff !important;
+  color: #157afe !important;
+  border: 1.2px solid #157afe !important;
+}
+
+.btn-outline:hover {
+  background: linear-gradient(90deg, #eca6a6, #157afe 90%) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.13) !important;
+  color: cornsilk !important;
+}
+
+
 .btn:hover, .btn-ver:hover, .btn-editar:hover, .btn-buscar:hover {
   background: linear-gradient(90deg, #0A3150, #157afe 90%);
   box-shadow: 0 4px 20px rgba(10,49,80,0.13);
 }
 
 /* Inputs e selects */
-input[type="text"], input[type="datetime-local"], select, textarea {
+input[type="text"], input[type="datetime-local"], input[type="url"], select, textarea {
   padding: 10px;
   margin: 6px 0 14px 0;
   border: 1px solid #d6dee7;
@@ -163,11 +191,34 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
 
 /* Painel superior relatórios */
 
+.info-superior {
+
+}
+
 .filtro-relatorio {
   display: flex;
-  gap: 1.2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin-bottom: 1.5rem;
   align-items: baseline;
+}
+
+.filtro-relatorio .actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filtro-relatorio button {
+  flex-wrap: wrap;
+  min-width: 0;
+  box-sizing: border-box;
+  gap: 8px;
+}
+
+/* Se .btn-buscar for diferente dos outros, só inclua o que for necessário aqui, ex: cor extra ou z-index */
+.filtro-relatorio .btn-buscar {
+  /* estilizações específicas (se houver) */
 }
 
 .filtro-relatorio input,
@@ -186,6 +237,23 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
 .filtro-relatorio input:focus,
 .filtro-relatorio select:focus {
   border-color: #157afe;
+}
+
+.paginacao-relatorios {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 10px 0 20px 0;
+}
+#info-paginacao {
+  font-size: 1.04rem;
+  color: #0a3150;
+  margin-right: 12px;
+}
+.paginacao-relatorios .btn {
+  min-width: 90px;
+  font-size: 1.01rem;
+  padding: 6px 20px;
 }
 
 .filtro-relatorio .btn-outline {
@@ -216,6 +284,33 @@ input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, text
   font-size: 1.07rem;
   padding: 11px 8px;
   text-align: center;
+}
+
+.periodo-apurado-bloco {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.periodo-apurado-bloco input[type="date"] {
+  min-width: 0;
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #d6dee7;
+  border-radius: 7px;
+  background: #fafdff;
+  color: #0A3150;
+}
+.ate-label {
+  font-weight: bold;
+  margin: 0 4px;
+}
+@media (max-width: 700px) {
+  .periodo-apurado-bloco input[type="date"] {
+    width: 100px;
+    font-size: 0.97rem;
+    padding: 8px 4px;
+  }
 }
 
 .relatorio-superior {
@@ -382,7 +477,7 @@ input[readonly] {
 /* Login page */
 .login-container {
   max-width: 360px;
-  margin: 80px auto;
+  margin: 230px auto;
   padding: 2.5rem 2rem 1.5rem 2rem;
   background: #fff;
   border-radius: 12px;
@@ -533,6 +628,10 @@ input[readonly] {
 
 @media (max-width: 600px) {
   .login-container { margin: 20px 5px; }
+  .chart-container {
+    width: 100%;
+    padding: 0 1rem;
+  }
 }
 
 /* Responsividade */
@@ -744,22 +843,45 @@ input[type="text"]::placeholder, textarea::placeholder {
   }
 }
 
+/* === IMPRESSÃO REFINADA: evitar órfãos de assinatura mantendo só via CSS === */
+.recomendacoes {
+  page-break-inside: avoid;
+  widows: 2;
+  orphans: 2;
+}
+
+.bloco-assinatura-print {
+  page-break-inside: avoid;
+  widows: 2;
+  orphans: 2;
+  page-break-after: avoid;
+}
+
+/* Consolida e reforça regras de print para manter tudo junto e limpar UI */
 @media print {
-  /* Remove tudo que não for relatório */
-    nav.menu, .btn-print, #btnPrintRelatorio, .navbar, .navbar-container, .navbar-actions {
+  /* esconder UI externa */
+  nav.menu,
+  .btn-print,
+  #btnPrintRelatorio,
+  .navbar,
+  .navbar-container,
+  .navbar-actions {
     display: none !important;
   }
+
   h1 {
     text-align: center !important;
     margin-top: 10px !important;
     margin-bottom: 18px !important;
   }
+  
   .info-sdr {
     text-align: center !important;
     margin: 10px 0 18px 0 !important;
     font-size: 1.03rem !important;
     font-weight: 500 !important;
   }
+
   .container {
     width: 19cm !important;
     max-width: 19cm !important;
@@ -769,6 +891,25 @@ input[type="text"]::placeholder, textarea::placeholder {
     box-shadow: none !important;
     background: #fff !important;
   }
+
+    .chart-container {
+    width: 80% !important;       /* ocupa só 40% da largura disponível */
+    max-width: 800px !important; /* nunca passe de 300px */
+    margin: 1rem auto !important;/* centraliza e dá um respiro */
+  }
+
+  /* 2) Canvas com altura bem contida */
+  .chart-container canvas {
+    width: 100% !important;
+    height: 110px !important;    /* menor que antes, mas ainda legível */
+  }
+
+  /* 3) Caso queira um “zoom out” extra sem mexer em width/height */
+  .chart-container {
+    transform: scale(0.8);
+    transform-origin: top center;
+  }
+
   .relatorio-superior {
     display: flex !important;
     flex-direction: row !important;
@@ -778,7 +919,9 @@ input[type="text"]::placeholder, textarea::placeholder {
     margin-bottom: 6px !important;
     flex-wrap: nowrap !important;
   }
-  .info-bloco, .nota-bloco {
+
+  .info-bloco,
+  .nota-bloco {
     min-width: 200px !important;
     max-width: 350px !important;
     flex: 1 1 0 !important;
@@ -789,51 +932,62 @@ input[type="text"]::placeholder, textarea::placeholder {
     border: none !important;
     margin: 0 !important;
   }
+
   .nota-bloco {
     text-align: left !important;
     margin-left: 10px !important;
   }
+
   #btnPrintRelatorio {
     display: none !important;
   }
+
   #totais-ligacoes-relatorio {
     border-radius: 0 !important;
     box-shadow: none !important;
     padding: 10px 3px !important;
     margin: 8px 0 18px 0 !important;
   }
-  a[href]:after { content: ""; }
-  h1, h2, h3 { page-break-after: avoid; }
+
+  a[href]:after {
+    content: "";
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
   table, th, td {
     page-break-inside: avoid;
   }
-}
 
-.bloco-assinatura-print {
-  display: none;
-}
+  .tabela-relatorios thead th {
+    text-align: center !important;
+  }
 
-@media print {
+  /* se a assinatura estivesse prestes a ficar órfã, força quebra antes dela */
   .bloco-assinatura-print {
     display: block !important;
     margin-top: 48px !important;
     margin-bottom: 10px !important;
     font-size: 1.04rem;
     color: #0a3150;
-    page-break-inside: avoid;
+    page-break-after: avoid;
+    page-break-before: avoid;
   }
-    /* Reduz fonte dos cards dos critérios */
+
+  /* reduz visual/leves ajustes para aumentar chance de caber junto */
+  .recomendacoes,
+  .bloco-assinatura-print {
+    font-size: 11pt;
+  }
+
+  /* ajustes dos cartões como antes */
   .criterio-card {
-    font-size: 0.95rem !important;
     padding: 0.7rem 1rem !important;
     margin: 0.6rem 0 !important;
   }
-  .criterio-card strong {
-    font-size: 0.99rem !important;
-  }
-  .criterio-card span {
-    font-size: 0.93rem !important;
-  }
+
   .linha-assinatura {
     display: flex;
     justify-content: space-between;
@@ -864,9 +1018,54 @@ input[type="text"]::placeholder, textarea::placeholder {
   }
   .data-emissao {
     margin-top: 10px;
-    text-align: right;
-    font-size: 0.97rem;
+    text-align: center;
+    font-size: 11pt;
     color: #123c8c;
     font-style: italic;
   }
+    body, .info-bloco, .nota-bloco, table, td, th {
+    font-size: 11pt !important;
+    line-height: 1.0 !important;
+  }
+
+  /* títulos menores, mantendo hierarquia */
+  h1 {
+    font-size: 18pt !important;
+    margin-bottom: 0.3rem !important;
+  }
+  h2 {
+    font-size: 16pt !important;
+  }
+  h3 {
+    font-size: 14pt !important;
+  }
+
+  /* cartões de critério ainda mais compactos se precisar */
+  .criterio-card {
+    font-size: 9pt !important;
+    padding: 0.5rem 1rem !important;
+  }
+  .criterio-card strong {
+    font-size: 10pt !important;
+  }
+
+  /* Recomendações e assinatura: leve redução extra para encaixar */
+  .recomendacoes,
+  .bloco-assinatura-print {
+    font-size: 0.9rem !important;
+  }
+
+  /* Cabeçalho de tabelas e células com menos espaço */
+  .cabecalho-tabela th, .cabecalho-tabela td {
+    font-size: 0.9rem !important;
+    padding: 6px 4px !important;
+  }
+  table td {
+    padding: 6px 4px !important;
+  }
 }
+
+.bloco-assinatura-print {
+  display: none;
+}
+

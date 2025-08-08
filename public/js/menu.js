@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // INJETA O HTML DO MENU!
+  // INJETA O HTML DA ESTRUTURA BÁSICA DO MENU (links serão populados depois)
   const htmlMenu = `
 <header class="cubbotech-navbar">
   <div class="navbar-container">
@@ -7,8 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <img src="assets/images/Imagotipo CubboTech Branca.png" alt="CubboTech" />
     </a>
     <nav class="navbar-links" id="navbarLinks">
-      <a href="index.html">Início</a>
-      <a href="formulario.html">Formulário</a>
+      <!-- Links serão inseridos dinamicamente -->
     </nav>
     <div class="navbar-actions">
       <span id="usuario-logado" class="navbar-user"></span>
@@ -21,43 +20,68 @@ document.addEventListener("DOMContentLoaded", () => {
 </header>
   `;
 
-  // Injeta dentro do elemento nav.menu (assim o menu aparece!)
   const navEl = document.querySelector("nav.menu");
   if (navEl) navEl.innerHTML = htmlMenu;
 
-  // ...restante do seu JS (eventos do hamburguer, etc)...
+  // referencias
   const toggle = document.getElementById('navbarToggle');
-  const links = document.getElementById('navbarLinks');
-  if(toggle && links){
-    toggle.addEventListener('click', () => {
-      links.classList.toggle('active');
-    });
-    // Fecha o menu ao clicar em um link (no mobile)
-    links.querySelectorAll('a').forEach(link => {
+  const linksContainer = document.getElementById('navbarLinks');
+
+  // função para montar os links conforme role
+  function montarLinks(isGestor) {
+    if (!linksContainer) return;
+    let linksHTML = `<a href="index.html">Início</a>`;
+    if (isGestor) {
+      linksHTML += `<a href="formulario-sdr.html">Formulário SDR</a>`;
+      linksHTML += `<a href="formulario-consultor.html">Formulário Consultor</a>`;
+    }
+    linksContainer.innerHTML = linksHTML;
+
+    // reaplica comportamento mobile
+    linksContainer.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
-        if(window.innerWidth < 701) links.classList.remove('active');
+        if (window.innerWidth < 701) linksContainer.classList.remove('active');
       });
     });
   }
 
-  firebase.auth().onAuthStateChanged(function(user) {
+  // toggle do mobile
+  if (toggle && linksContainer) {
+    toggle.addEventListener('click', () => {
+      linksContainer.classList.toggle('active');
+    });
+  }
+
+  // Autenticação e role
+  firebase.auth().onAuthStateChanged(async function(user) {
     const userSpan = document.getElementById('usuario-logado');
     const logoutBtn = document.getElementById('logoutBtn');
     if (user) {
-      // Exibe email (ou displayName se quiser mais estiloso)
       userSpan.textContent = user.displayName ? user.displayName : user.email;
       logoutBtn.style.display = "inline-block";
+
+      // pega claim de role
+      let isGestor = false;
+      try {
+        const tokenResult = await user.getIdTokenResult();
+        isGestor = tokenResult.claims.role === 'gestor';
+      } catch (e) {
+        console.warn("Erro ao obter claims do token:", e);
+      }
+
+      montarLinks(isGestor);
     } else {
       userSpan.textContent = "";
       logoutBtn.style.display = "none";
+      montarLinks(false); // só "Início"
     }
   });
 
-  // Logout funcional
+  // Logout
   document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'logoutBtn') {
       firebase.auth().signOut().then(function() {
-        window.location.href = "login.html"; // ou sua tela inicial/login
+        window.location.href = "login.html";
       });
     }
   });

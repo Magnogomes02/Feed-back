@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulário de Feedback - Consultor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <nav class="menu"></nav>
+
+  <main class="container">
+    <h1>Formulário de Feedback - Consultor</h1>
+    <form id="feedbackForm">
+      <div class="form-bloco01">
+        <label>Nome do Agente:
+          <select name="agente" required>
+            <option value="">Selecione o consultor</option>
+            <option value="Flávio">Flávio</option>
+            <option value="Felipe">Felipe</option>
+            <option value="Kimbelly">Kimbelly</option>
+            <option value="Sávio">Sávio</option>
+            <option value="TESTE">TESTE</option>
+          </select>
+        </label>
+
+        <label>Protocolo:
+          <input type="text" name="protocolo" required placeholder="Número do negócio">
+        </label>
+
+        <label>
+          Período apurado:
+          <span class="periodo-apurado-bloco">
+            <input type="date" name="periodo_inicio" required>
+            <span class="ate-label">até</span>
+            <input type="date" name="periodo_fim" required>
+          </span>
+        </label>
+
+        <label>Data da reunião:
+          <input type="datetime-local" name="datalig" required>
+        </label>
+
+        <label>Link TL;DV:
+          <input type="url" name="link_tldv" placeholder="https://tl.dv/…">
+        </label>
+
+        <label>Link PipeDrive:
+          <input type="url" name="link_pipe" placeholder="https://pipedrive.com/…">
+        </label>
+      </div>
+
+      <div class="form-bloco03">
+        <h2>Avaliação de processos e habilidades</h2>
+        <div id="criterios"></div>
+      </div>
+
+      <div class="form-bloco04">
+        <label>Recomendações Finais:
+          <textarea name="recomendacoes" rows="5"></textarea>
+        </label>
+        <label>Plano de Ação:
+          <textarea name="plano_acao" rows="5"></textarea>
+        </label>
+      </div>
+
+      <div class="btn-gerar-relatorio">
+        <button type="submit" class="btn">Gerar Relatório</button>
+      </div>
+    </form>
+  </main>
+
+  <!-- Scripts Firebase + projeto -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/formulario-consultor.js"></script>
+</body>
+</html>
